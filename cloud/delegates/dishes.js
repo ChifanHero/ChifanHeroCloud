@@ -13,6 +13,7 @@ exports.find = function(req, res) {
 	query.include('from_restaurant');
 	query.equalTo('from_restaurant', rest);
 	query.include('picture');
+	query.limit(200);
 	query.find().then(function(results) {
 		var dishes = [];
 		if (results != undefined && results.length > 0) {

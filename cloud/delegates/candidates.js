@@ -7,7 +7,7 @@ var error_handler = require('cloud/error_handler');
 
 exports.create = function(req, res){
 	var dishId = req.body['dish_id'];
-	var listId = req.params.id;
+	var listId = req.body['list_id'];
 	if (dishId == undefined || listId == undefined) {
 		res.json(401, 'invalid parameters');
 		return;

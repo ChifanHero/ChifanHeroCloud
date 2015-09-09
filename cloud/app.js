@@ -11,6 +11,7 @@ var users = require('cloud/delegates/users');
 var reviews = require('cloud/delegates/reviews');
 var favorites = require('cloud/delegates/favorites');
 var candidates = require('cloud/delegates/candidates');
+var menus = require('cloud/delegates/menus');
 
 app.use(express.bodyParser());  // Populate req.body
 app.use(function(req, res, next){
@@ -50,6 +51,7 @@ app.get('/reviews', reviews.find);
 app.post('/favorites', favorites.create);
 app.get('/favorites', favorites.find);
 app.delete('/favorites', favorites.delete); 
-app.post('/lists/:id/candidates', candidates.create);
+app.post('/candidates', candidates.create);
+app.get('/restaurants/:id/menu', menus.find);
 
 app.listen();
