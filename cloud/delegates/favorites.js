@@ -85,16 +85,16 @@ exports.find = function(req, res){
 	query.include('list');
 
 	query.find().then(function(results) {
+		var reviews = [];
 		if (results != undefined && results.length > 0) {
-			var reviews = [];
 			_.each(results, function(result) {
 				var rev = favorite_assembler.assemble(result);
 				reviews.push(rev);
 			});
-			var response = {};
-			response['results'] = reviews;
-			res.json(200, response);
 		}
+		var response = {};
+		response['results'] = reviews;
+		res.json(200, response);
 	}, function(error) {
 		error_handler.handle(error, {}, res);
 	});

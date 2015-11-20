@@ -15,7 +15,7 @@ var menus = require('cloud/delegates/menus');
 
 app.use(express.bodyParser());  // Populate req.body
 app.use(function(req, res, next){
-    var sessionToken = req.get("user-session");
+    var sessionToken = req.get("User-Session");
     if(sessionToken === undefined){
         next();
     } else {
