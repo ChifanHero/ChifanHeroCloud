@@ -42,7 +42,7 @@ function createThumbnail(data, fileName) {
 			if (width <= 100 || height <= 100) {
 				image.data().then(function(buffer){
 					var base64 = buffer.toString('base64'); 
-					var file = new Parse.File("thumbnail.jped", {base64 : base64});
+					var file = new Parse.File("thumbnail.jpeg", {base64 : base64});
 					return file.save();
 				}).then(function(file){
 					promise.resolve(file);
