@@ -1,6 +1,11 @@
 var GOOGLE_API_KEY = 'AIzaSyCRvcRsKxM0WHjJOOMGKnxtFF7CwoYJ7FU';
 var GOOGLE_GEOCODING_ENDPOINT = 'https://maps.googleapis.com/maps/api/geocode/json?key='.concat(GOOGLE_API_KEY).concat('&');
- 
+var Review = Parse.Object.extend('Review');
+var Favorite = Parse.Object.extend('Favorite');
+var Dish = Parse.Object.extend('Dish');
+var Menu = Parse.Object.extend('MenuItem');
+var indexer = require('cloud/indexer');
+
 Parse.Cloud.beforeSave('Restaurant', function(request, response){
 	var restaurantToSave = request.object;
 	if (restaurantToSave.dirty('address')) {
@@ -19,6 +24,66 @@ Parse.Cloud.beforeSave('Restaurant', function(request, response){
 		response.success();
 	}
 }); 
+
+Parse.Cloud.afterSave('Restaurant', function(request) {
+	var restaurant = request.object;
+	indexer.indexRestaurant(restaurant);
+
+});
+
+Parse.Cloud.afterDelete('Restaurant', function(request) {
+ 	var restaurant = request.object;
+	
+});
+
+function deleteRestaurantFromIndex(restaurant) {
+	if (restaurant === undefined) {
+		return;
+	}
+	indexer.deleteRestaurant(restaurant);
+}
+
+function deleteRelatedRecords(restaurant) {
+	if (restaurant === undefined) {
+		return;
+	}
+	var reviewQuery = new Parse.Query(Review);
+	var favoriteQuery = new Parse.Query(Favorite);
+	var dishQuery = new Parse.Query(Dish);
+	var menuQuery = new Parse.Query(Menu);
+	reviewQuery.equalTo('restaurant', restaurant);
+	favoriteQuery.equalTo('restaurant', restaurant);
+	dishQuery.equalTo('from_restaurant', restaurant);
+	reviewQuery.find().then(function(results){
+		Parse.Object.destroyAll(results).then(function(){
+
+		}, function(error){
+			console.error('Error deleting reviews. error is ' + error.code + ': ' + error.message);
+		});
+	});
+	favoriteQuery.find().then(function(results){
+		Parse.Object.destroyAll(results).then(function(){
+
+		}, function(error){
+			console.error('Error deleting favorites. error is ' + error.code + ': ' + error.message);
+		});
+	});
+	dishQuery.find().then(function(results){
+		Parse.Object.destroyAll(results).then(function(){
+
+		}, function(error){
+			console.error('Error deleting dishes. error is ' + error.code + ': ' + error.message);
+		});
+	});
+	menuQuery.find().then(function(results){
+		Parse.Object.destroyAll(results).then(function(){
+
+		}, function(error){
+			console.error('Error deleting menu. error is ' + error.code + ': ' + error.message);
+		});
+	});
+}
+
 
 function getCoordinatesFromAddress(address) {
 	var promise = new Parse.Promise();
