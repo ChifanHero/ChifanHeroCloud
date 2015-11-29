@@ -33,6 +33,8 @@ Parse.Cloud.afterSave('Restaurant', function(request) {
 
 Parse.Cloud.afterDelete('Restaurant', function(request) {
  	var restaurant = request.object;
+ 	deleteRestaurantFromIndex(restaurant);
+ 	deleteRelatedRecords(restaurant);
 	
 });
 

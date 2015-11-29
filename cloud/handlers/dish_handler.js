@@ -60,15 +60,6 @@ function reindexRestaurant(dish) {
 Parse.Cloud.afterSave('Dish', function(request) {
 	var dish = request.object;
 	indexer.indexDish(dish);
-	var restaurant = dish.get('from_restaurant');
-	if (restaurant !== undefined) {
-		restaurant.fetch().then(function(fromRest){
-			if (fromRest !== undefined) {
-				indexer.indexRestaurant(fromRest);
-			}
-		}, function(error){
-			console.error(error);
-		});
-	}
+	reindexRestaurant(dish);
 
 });

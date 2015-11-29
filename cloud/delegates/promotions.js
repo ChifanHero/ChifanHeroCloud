@@ -4,6 +4,7 @@ var promotion_assembler = require('cloud/assemblers/promotion');
 var error_handler = require('cloud/error_handler');
 
 exports.listAll = function(req, res) {
+	// var userLocation = req.body['user_location'];
 	var query = new Parse.Query(Promotion);
 	query.include('restaurant.picture');
 	query.include('dish.from_restaurant');
