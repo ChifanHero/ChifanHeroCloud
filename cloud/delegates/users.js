@@ -2,7 +2,9 @@ var user_assembler = require('cloud/assemblers/user');
 var image_assembler = require('cloud/assemblers/image');
 var error_handler = require('cloud/error_handler');
 
-exports.signIn = function(req, res){
+exports.logIn = function(req, res){
+
+	//can't use req.body['username']
 	var username = req.body.username;
 	var encodedPassword = req.body.password;
 	Parse.User.logIn(username, encodedPassword).then(function(_user){
@@ -18,9 +20,7 @@ exports.signIn = function(req, res){
 				response['user'] = user;
 				res.json(200, response);
 			}, function(error){
-				console.log(error);
-				response['user'] = user;
-				res.json(200, response);
+				error_handler.handle(error, {}, res);
 			});
 		} else {
 			response['user'] = user;
@@ -33,9 +33,11 @@ exports.signIn = function(req, res){
 
 
 exports.signUp = function(req, res) {
+
+	//can't use req.body['username']
 	var username = req.body.username;
 	var encodedPassword = req.body.password;
-	var email = req.body.username;
+	var email = username;
 
 	//username must be provided
 	if (username == undefined) {
@@ -63,7 +65,7 @@ exports.signUp = function(req, res) {
 	user.set('username', username);
 	user.set('password', encodedPassword);
 	user.set('email', email);
-	user.signUp(null).then(function(_user){
+	user.signUp().then(function(_user){
 		var response = {};
 		response['success'] = true;
 		response['session_token'] = _user.getSessionToken();
@@ -78,9 +80,7 @@ exports.signUp = function(req, res) {
 				response['user'] = userRes;
 				res.json(200, response);
 			}, function(error){
-				console.log(error);
-				response['user'] = userRes;
-				res.json(200, response);
+				error_handler.handle(error, {}, res);
 			});
 		} else {
 			response['user'] = userRes;
@@ -93,31 +93,60 @@ exports.signUp = function(req, res) {
 }
 
 exports.update = function(req, res){
+
+	//If session token is invalid, Parse will handle that
+	//We don't need to verify session token
 	var user = req.user;
-	if (user === undefined) {
-		var error = {};
-		error['message'] = 'Permission required to update user\'s profile';
-		res.json(401, error);
-		return;
-	}
+
 	var nickName = req.body['nick_name'];
-	var favoriteCuisine = req.body['favorite_cuisine'];
-	user.set('nick_name', nickName);
-	user.set('favorite_cuisine', favoriteCuisine);
+	var pictureId = req.body['pictureId']
+
+	if(nickName != undefined){
+		user.set('nick_name', nickName);
+	}
+	if(pictureId != undefined){
+		var picture = {
+	        __type: "Pointer",
+	        className: "Image",
+	        objectId: pictureId
+	    };
+		user.set('picture', picture)
+	}
+	
 	user.save().then(function(_user){
-		var user = {};
-		user['id'] = _user.id;
-		user['username'] = _user.get('username');
-		user['nick_name'] = _user.get('nick_name');
-		user['level'] = _user.get('level');
+		var response = {};
+		response['success'] = true;
+
+		var userRes = {};
+		userRes = user_assembler.assemble(_user);
 		var picture = _user.get('picture');
 		if (picture != undefined) {
-			user['picture'] = picture.url();
+			picture.fetch().then(function(_picture){
+				var pictureRes = image_assembler.assemble(_picture);
+				userRes['picture'] = pictureRes;
+				response['user'] = userRes;
+				res.json(200, response);
+			}, function(error){
+				error_handler.handle(error, {}, res);
+			});
+		} else {
+			response['user'] = userRes;
+			res.json(200, response);
 		}
-		var response = {};
-		response['result'] = user;
-		res.json(200, response);
 	}, function(error){
 		error_handler.handle(error, {}, res);
 	}); 
 }
+
+exports.logOut = function(req, res){
+
+	//User-Session is required in HTTP header
+	Parse.User.logOut().then(function(){
+		var response = {};
+		response['success'] = true;
+		res.json(200, response);
+	}, function(error){
+		error_handler.handle(error, {}, res);
+	});	
+}
+

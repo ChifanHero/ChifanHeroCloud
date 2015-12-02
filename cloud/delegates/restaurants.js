@@ -23,7 +23,7 @@ exports.listAll = function(req, res) {
 	})
 }
 
-exports.show = function(req, res) {
+exports.findById = function(req, res) {
 	var id = req.params.id;
 	var promises = [];
 	promises.push(findRestaurantById(id));
@@ -51,6 +51,41 @@ exports.show = function(req, res) {
 		var response = {};
 		response['result'] = restaurant;
 		res.json(200, response);
+	}, function(error) {
+		error_handler.handle(error, {}, res);
+	});
+}
+
+exports.comment = function(req, res){
+	var id = req.params.id;
+	var like = 0;
+	var dislike = 0;
+	var neutral = 0;
+
+	if(req.body['like'] !== undefined){
+		like = 1;	
+	} else if(req.body['dislike'] !== undefined){
+		dislike = 1;	
+	} else if(req.body['neutral'] !== undefined){
+		neutral = 1;
+	}	
+	
+	var query = new Parse.Query(Restaurant);
+	query.get(id).then(function(_restaurant){
+		var likeCount = _restaurant.get('like_count');
+		var dislikeCount = _restaurant.get('dislike_count');
+		var neutralCount = _restaurant.get('neutral_count');
+		_restaurant.set('like_count', likeCount + like);
+		_restaurant.set('dislike_count', dislikeCount + dislike);
+		_restaurant.set('neutral_count', neutralCount + neutral);
+		_restaurant.save().then(function(_restaurant){
+			var restaurantRes = restaurant_assembler.assemble(_restaurant);
+			var response = {};
+			response['result'] = restaurantRes;
+			res.json(200, response);
+		}, function(error) {
+			error_handler.handle(error, {}, res);
+		});
 	}, function(error) {
 		error_handler.handle(error, {}, res);
 	});

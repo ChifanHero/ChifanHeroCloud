@@ -38,7 +38,7 @@ app.use(function(req, res, next){
 app.get('/restaurants', restaurants.listAll);
 app.get('/promotions', promotions.listAll);
 app.get('/messages', messages.listAll); 
-app.get('/restaurants/:id', restaurants.show);
+app.get('/restaurants/:id', restaurants.findById);
 app.get('/lists', lists.listAll);
 app.get('/dishes', dishes.find);
 app.get('/dishes/:id', dishes.show);
@@ -50,15 +50,17 @@ app.get('/favorites', favorites.find);
 app.get('/restaurants/:id/menu', menus.find);
 
 //POST
-app.post('/users/signIn', users.signIn);
 app.post('/users/signUp', users.signUp);
+app.post('/users/logIn', users.logIn);
+app.post('/users/update', users.update);
+app.post('/users/logOut', users.logOut);
 app.post('/reviews', reviews.create);
 app.post('/favorites', favorites.create);
 app.post('/candidates', candidates.create);
 app.post('/images', images.create);
+app.post('/restaurants/:id', restaurants.comment);
 
 //PUT
-app.put('/users/:id', users.update);
 
 //DELETE
 app.delete('/favorites', favorites.delete); 

@@ -1,6 +1,7 @@
 exports.assemble = function(source){
 	var picture = {};
 	if (source != undefined) {
+		picture['id'] = source.id;
 		if (source.get('thumbnail') != undefined) {
 			picture['thumbnail'] = source.get('thumbnail').url();
 		}

@@ -5,7 +5,6 @@ exports.assemble = function(source) {
 		user['username'] = source.get('username');
 		user['nick_name'] = source.get('nick_name');
 		user['email'] = source.get('email');
-		user['level'] = source.get('level');
 	}
 	return user;
 }
