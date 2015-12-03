@@ -19,7 +19,7 @@ exports.listAll = function(req, res) {
 	});
 }
 
-exports.show = function(req, res) {
+exports.findById = function(req, res) {
 	var id = req.params.id;
 	var query = new Parse.Query(Message);
 	query.get(id).then(function(obj){

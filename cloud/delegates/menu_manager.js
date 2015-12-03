@@ -5,7 +5,7 @@ var error_handler = require('cloud/error_handler');
 var dish_assembler = require('cloud/assemblers/dish');
 var Restaurant = Parse.Object.extend('Restaurant');
 
-exports.find = function(req, res) {
+exports.findByRestaurantId = function(req, res) {
 	var restaurantId = req.params.id;
 	var restaurant = new Restaurant();
 	restaurant.id = restaurantId;

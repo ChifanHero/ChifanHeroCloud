@@ -56,17 +56,17 @@ exports.findById = function(req, res) {
 	});
 }
 
-exports.comment = function(req, res){
+exports.rate = function(req, res){
 	var id = req.params.id;
 	var like = 0;
 	var dislike = 0;
 	var neutral = 0;
 
-	if(req.body['like'] !== undefined){
+	if(req.body['like'] === true){
 		like = 1;	
-	} else if(req.body['dislike'] !== undefined){
+	} else if(req.body['dislike'] === true){
 		dislike = 1;	
-	} else if(req.body['neutral'] !== undefined){
+	} else if(req.body['neutral'] === true){
 		neutral = 1;
 	}	
 	

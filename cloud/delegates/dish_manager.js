@@ -5,7 +5,7 @@ var _ = require('underscore');
 var dish_assembler = require('cloud/assemblers/dish');
 var error_handler = require('cloud/error_handler');
 
-exports.find = function(req, res) {
+exports.findByRestaurantId = function(req, res) {
 	var restId = req.query.restaurant;
 	var rest = new Restaurant();
 	rest.id = restId;
@@ -30,7 +30,7 @@ exports.find = function(req, res) {
 	});
 }
 
-exports.show = function(req, res) {
+exports.findById = function(req, res) {
 	var id = req.params.id;
 	var promises = [];
 	promises.push(findDishById(id));

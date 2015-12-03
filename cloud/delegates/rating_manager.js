@@ -1,13 +1,13 @@
 var _ = require('underscore');
-var Review = Parse.Object.extend('Review');
+var Rating = Parse.Object.extend('Rating');
 var Restaurant = Parse.Object.extend('Restaurant');
 var Dish = Parse.Object.extend('Dish');
 var List = Parse.Object.extend('List');
 var restaurant_assembler = require('cloud/assemblers/restaurant');
-var review_assembler = require('cloud/assemblers/review');
+var rating_assembler = require('cloud/assemblers/rating');
 var error_handler = require('cloud/error_handler');
 
-exports.create = function(req, res){
+exports.rate = function(req, res){
 	var user = req.user;
 	if (user == undefined) {
 		var error = {};
@@ -20,31 +20,31 @@ exports.create = function(req, res){
 		if (!validateParameters(type, action, res)) {
 			return;
 		}
-		var review = new Review();
+		var rating = new Rating();
 		if (type === 'dish') {
 			var dish = new Dish();
 			dish.id = objectId;
-			review.set('type', type);
-			review.set('action', action);
-			review.set('user', user);
-			review.set('dish', dish);
+			rating.set('type', type);
+			rating.set('action', action);
+			rating.set('user', user);
+			rating.set('dish', dish);
 		} else if (type === 'restaurant') {
 			var restaurant = new Restaurant();
 			restaurant.id = objectId;
-			review.set('type', type);
-			review.set('action', action);
-			review.set('user', user);
-			review.set('restaurant', restaurant);
+			rating.set('type', type);
+			rating.set('action', action);
+			rating.set('user', user);
+			rating.set('restaurant', restaurant);
 		} else if (type === 'list') {
 			var list = new List();
 			list.id = objectId;
-			review.set('type', type);
-			review.set('action', action);
-			review.set('user', user);
-			review.set('list', list);
+			rating.set('type', type);
+			rating.set('action', action);
+			rating.set('user', user);
+			rating.set('list', list);
 		}
-		review.save().then(function(_review){
-			var rev = review_assembler.assemble(_review);
+		rating.save().then(function(_rating){
+			var rev = rating_assembler.assemble(_rating);
 			var response = {};
 			response['result'] = rev;
 			res.json(201, response);
@@ -69,7 +69,7 @@ function validateParameters(type, action, res) {
 	return true;
 }
 
-exports.find = function(req, res) {
+exports.findByUserSession = function(req, res) {
 	var action = req.query['action'];
 	var type = req.query['type'];
 	var user = req.user;
@@ -81,7 +81,7 @@ exports.find = function(req, res) {
 		if (!validateParameters(type, action, res)) {
 			return;
 		}
-		var query = new Parse.Query(Review);
+		var query = new Parse.Query(rating);
 		query.equalTo('user', user);
 		query.limit(10);
 		query.include('dish.from_restaurant');
@@ -91,13 +91,13 @@ exports.find = function(req, res) {
 		query.equalTo('type', type);
 		query.find().then(function(results) {
 			if (results != undefined && results.length > 0) {
-				var reviews = [];
+				var ratings = [];
 				_.each(results, function(result) {
-					var rev = review_assembler.assemble(result);
-					reviews.push(rev);
+					var rev = rating_assembler.assemble(result);
+					ratings.push(rev);
 				});
 				var response = {};
-				response['results'] = reviews;
+				response['results'] = ratings;
 				res.json(200, response);
 			} else {
 				var response = {};

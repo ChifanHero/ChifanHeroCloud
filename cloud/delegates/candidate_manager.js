@@ -5,7 +5,7 @@ var ListCandidate = Parse.Object.extend('ListCandidate');
 var candidate_assembler = require('cloud/assemblers/candidate');
 var error_handler = require('cloud/error_handler');
 
-exports.create = function(req, res){
+exports.nominate = function(req, res){
 	var dishId = req.body['dish_id'];
 	var listId = req.body['list_id'];
 	if (dishId == undefined || listId == undefined) {

@@ -22,7 +22,7 @@ exports.listAll = function(req, res) {
 	});
 }
 
-exports.show = function(req, res) {
+exports.findById = function(req, res) {
 	var id = req.params.id;
 	var promises = [];
 	promises.push(getListById(id));
