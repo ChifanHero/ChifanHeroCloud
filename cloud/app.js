@@ -13,7 +13,8 @@ var candidate_manager = require('cloud/delegates/candidate_manager');
 var menu_manager = require('cloud/delegates/menu_manager');
 var image_manager = require('cloud/delegates/image_manager');
 
-app.use(express.bodyParser());  // Populate req.body
+//Populate req.body
+app.use(express.bodyParser());
 app.use(function(req, res, next){
     var sessionToken = req.get("User-Session");
     if(sessionToken === undefined){
@@ -34,41 +35,41 @@ app.use(function(req, res, next){
 });
 
 //GET
-app.get('/restaurantcollection', restaurant_manager.listAll);
-app.get('/restaurant/:id', restaurant_manager.findById);
-app.get('/restaurant/:id/menu', menu_manager.findByRestaurantId);
+app.get('/restaurants', restaurant_manager.listAll);
+app.get('/restaurants/:id', restaurant_manager.findById);
+app.get('/restaurants/:id/menus', menu_manager.findByRestaurantId);
 
 
-app.get('/messagecollection', message_manager.listAll);
-app.get('/message/:id', message_manager.findById);
+app.get('/messages', message_manager.listAll);
+app.get('/messages/:id', message_manager.findById);
 
-app.get('/listcollection', list_manager.listAll);
-app.get('/list/:id', list_manager.findById);
+app.get('/lists', list_manager.listAll);
+app.get('/lists/:id', list_manager.findById);
 
-app.get('/promotioncollection', promotion_manager.listAll);
+app.get('/promotions', promotion_manager.listAll);
 
-app.get('/dishcollection', dish_manager.findByRestaurantId);
-app.get('/dish/:id', dish_manager.findById);
+app.get('/dishes', dish_manager.findByRestaurantId);
+app.get('/dishes/:id', dish_manager.findById);
 
-app.get('/rating', rating_manager.findByUserSession);
-app.get('/favorite', favorite_manager.findByUserSession);
+app.get('/ratings', rating_manager.findByUserSession);
+app.get('/favorites', favorite_manager.findByUserSession);
 
 
 
 //POST
-app.post('/user/signUp', user_manager.signUp);
-app.post('/user/logIn', user_manager.logIn);
-app.post('/user/update', user_manager.update);
-app.post('/user/logOut', user_manager.logOut);
-app.post('/rating', rating_manager.rate);
-app.post('/favorite', favorite_manager.addToFavorite);
-app.post('/candidate', candidate_manager.nominate);
-app.post('/image', image_manager.upload);
+app.post('/users/signUp', user_manager.signUp);
+app.post('/users/logIn', user_manager.logIn);
+app.post('/users/update', user_manager.update);
+app.post('/users/logOut', user_manager.logOut);
+app.post('/ratings', rating_manager.rateByUserSession);
+app.post('/favorites', favorite_manager.addByUserSession);
+app.post('/candidates', candidate_manager.nominate);
+app.post('/images', image_manager.upload);
 //app.post('/restaurant/:id', restaurant_manager.rate);
 
 //PUT
 
 //DELETE
-app.delete('/favorite', favorite_manager.delete); 
+app.delete('/favorites', favorite_manager.deleteByUserSession); 
 
 app.listen();

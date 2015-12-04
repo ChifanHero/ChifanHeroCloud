@@ -8,7 +8,7 @@ var Dish = Parse.Object.extend('Dish');
 var List = Parse.Object.extend('List');
 
 
-exports.addToFavorite = function(req, res){
+exports.addByUserSession = function(req, res){
 	var user = req.user;
 	var type = req.body['type'];
 	var objectId = req.body['object_id'];
@@ -101,7 +101,7 @@ exports.findByUserSession = function(req, res){
 	
 }
 
-exports.delete = function(req, res){
+exports.deleteByUserSession = function(req, res){
 	var user = req.user;
 	var type = req.body['type'];
 	var objectId = req.body['object_id'];

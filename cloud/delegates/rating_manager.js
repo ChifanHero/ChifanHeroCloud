@@ -7,7 +7,7 @@ var restaurant_assembler = require('cloud/assemblers/restaurant');
 var rating_assembler = require('cloud/assemblers/rating');
 var error_handler = require('cloud/error_handler');
 
-exports.rate = function(req, res){
+exports.rateByUserSession = function(req, res){
 	var user = req.user;
 	if (user == undefined) {
 		var error = {};
