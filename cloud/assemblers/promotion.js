@@ -1,6 +1,5 @@
 var restaurant_assembler = require('cloud/assemblers/restaurant');
 var dish_assembler = require('cloud/assemblers/dish');
-var coupon_assembler = require('cloud/assemblers/coupon');
 
 exports.assemble = function(source){
 	var promotion = {};
@@ -14,10 +13,6 @@ exports.assemble = function(source){
 		if (source.get('dish') != undefined) {
 			var dish = dish_assembler.assemble(source.get('dish'));
 			promotion['dish'] = dish;
-		}
-		if (source.get('coupon') != undefined) {
-			var coupon = coupon_assembler.assemble(source.get('coupon'));
-			promotion['coupon'] = coupon;
 		}
 	}
 	return promotion;

@@ -56,7 +56,7 @@ exports.rate = function(req, res){
 
 function validateParameters(type, action, res) {
 	if (type !== 'dish' && type !== 'restaurant' && type !== 'list') {
-		var error {};
+		var error = {};
 		error['message'] = 'The parameter \'type\' is invalid';
 		res.json(400, error);
 		return false;
@@ -74,7 +74,7 @@ exports.findByUserSession = function(req, res) {
 	var type = req.query['type'];
 	var user = req.user;
 	if (user == undefined) {
-		var error {};
+		var error = {};
 		error['message'] = 'Not able to recoginize the user';
 		res.json(401, error);
 	} else {

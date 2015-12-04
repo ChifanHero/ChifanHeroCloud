@@ -1,18 +1,17 @@
 var express = require('express');
 var app = express();
 
-var restaurants = require('cloud/delegates/restaurants');
-var promotions = require('cloud/delegates/promotions');
-var messages = require('cloud/delegates/messages');
-var lists = require('cloud/delegates/lists');
-var dishes = require('cloud/delegates/dishes');
-var coupons = require('cloud/delegates/coupons');
-var users = require('cloud/delegates/users');
-var reviews = require('cloud/delegates/reviews');
-var favorites = require('cloud/delegates/favorites');
-var candidates = require('cloud/delegates/candidates');
-var menus = require('cloud/delegates/menus');
-var images = require('cloud/delegates/images');
+var restaurant_manager = require('cloud/delegates/restaurant_manager');
+var promotion_manager = require('cloud/delegates/promotion_manager');
+var message_manager = require('cloud/delegates/message_manager');
+var list_manager = require('cloud/delegates/list_manager');
+var dish_manager = require('cloud/delegates/dish_manager');
+var user_manager = require('cloud/delegates/user_manager');
+var rating_manager = require('cloud/delegates/rating_manager');
+var favorite_manager = require('cloud/delegates/favorite_manager');
+var candidate_manager = require('cloud/delegates/candidate_manager');
+var menu_manager = require('cloud/delegates/menu_manager');
+var image_manager = require('cloud/delegates/image_manager');
 
 app.use(express.bodyParser());  // Populate req.body
 app.use(function(req, res, next){
