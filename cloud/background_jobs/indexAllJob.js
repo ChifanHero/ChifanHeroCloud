@@ -1,18 +1,23 @@
 var Restaurant = Parse.Object.extend('Restaurant');
 var Dish = Parse.Object.extend('Dish');
 var DishList = Parse.Object.extend('List');
-var indexer = require('cloud/indexer');
+var indexer = require('cloud/indexer'); 
 
 Parse.Cloud.job("indexAll", function(request, status) {
   Parse.Cloud.useMasterKey();
-  
-  // Query for all users
-  reindexRestaurant(status);
-  reindexDish(status);
-  reindexList(status);
+  var promises = [];
+  promises.push(reindexRestaurant(status));
+  promises.push(reindexDish(status));
+  promises.push(reindexList(status));
+  Parse.Promise.when(promises).then(function(){
+    status.success("Index objects successfully.");
+  }, function() {
+    status.error("Index objects failed.");
+  });
 });
 
 function reindexRestaurant(status) {
+  var promise = new Parse.Promise();
   var counter = 0;
   var query = new Parse.Query(Restaurant);
   query.each(function(restaurant) {
@@ -23,16 +28,27 @@ function reindexRestaurant(status) {
       }
       counter += 1;
       return indexer.indexRestaurant(restaurant);
-  }).then(function() {
+  }).then(function(httpResponse) {
     // Set the job's success status
-    status.success("Index restaurant successfully.");
-  }, function(error) {
+    status.message("Index restaurant successfully.");
+    // console.log(httpResponse.status);
+    // console.log(httpResponse.text);
+    promise.resolve();
+  }, function(httpResponse) {
     // Set the job's error status
-    status.error("Index restaurant failed.");
+    status.message("Index restaurant failed.");
+    if (httpResponse !== undefined) {
+      console.error("http status is ".concat(httpResponse.status));
+    } else {
+      console.error("httpResponse is null");
+    }
+    promise.reject();
   });
+  return promise;
 }
 
 function reindexDish(status) {
+  var promise = new Parse.Promise();
   var counter = 0;
   var query = new Parse.Query(Dish);
   query.each(function(dish) {
@@ -42,17 +58,28 @@ function reindexDish(status) {
         status.message(counter + " dishes processed.");
       }
       counter += 1;
+      // console.log(httpResponse.status);
+      // console.log(httpResponse.text);
       return indexer.indexDish(dish);
-  }).then(function() {
+  }).then(function(httpResponse) {
     // Set the job's success status
-    status.success("Index dish successfully.");
-  }, function(error) {
+    status.message("Index dish successfully.");
+    promise.resolve();
+  }, function(httpResponse) {
     // Set the job's error status
-    status.error("Index dish failed.");
+    status.message("Index dish failed.");
+    if (httpResponse !== undefined) {
+      console.error("http status is ".concat(httpResponse.status));
+    } else {
+      console.error("httpResponse is null");
+    }
+    promise.reject();
   });
+  return promise;
 }
 
-function reindexList() {
+function reindexList(status) {
+  var promise = new Parse.Promise();
   var counter = 0;
   var query = new Parse.Query(DishList);
   query.each(function(dishList) {
@@ -63,11 +90,21 @@ function reindexList() {
       }
       counter += 1;
       return indexer.indexDishList(dishList);
-  }).then(function() {
+  }).then(function(httpResponse) {
     // Set the job's success status
-    status.success("Index list successfully.");
-  }, function(error) {
+    // console.log(httpResponse.status);
+    // console.log(httpResponse.text);
+    status.message("Index list successfully.");
+    promise.resolve();
+  }, function(httpResponse) {
     // Set the job's error status
-    status.error("Index list failed.");
+    status.message("Index list failed.");
+    if (httpResponse !== undefined) {
+      console.error("http status is ".concat(httpResponse.status));
+    } else {
+      console.error("httpResponse is null");
+    }
+    promise.reject();
   });
+  return promise;
 }

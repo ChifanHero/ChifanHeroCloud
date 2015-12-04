@@ -1,7 +1,8 @@
-var BASE_ENDPOINT = 'http://sohungrysearchservice.elasticbeanstalk.com/';
+var BASE_ENDPOINT = 'http://internal.lightningorder.com/';
  
 
 function index(type, source){
+	var promise = new Parse.Promise();
 	if (type !== "restaurant" && type !== "dish" && type !== "list") return;
 	if (source === undefined) return;
 	var endpoint;
@@ -12,27 +13,28 @@ function index(type, source){
 	} else if (type === "list") {
 		endpoint = BASE_ENDPOINT.concat('index/list/single');
 	}
-	console.log(endpoint);
 	var requestBody = JSON.stringify(source);
 	console.log(requestBody);
-	return Parse.Cloud.httpRequest({
+	Parse.Cloud.httpRequest({
 		method : "POST",
     	url : endpoint,
     	headers:{
-    		'Content-Type': 'application/json'
+    		'Content-Type': 'application/json;charset=utf-8'
 		},
-		body : requestBody
-		// ,
-		// success : function(httpResponse){
-		// 	console.log("success");
-		// 	console.log(httpResponse.text);
-		// },
-		// error : function(httpResponse) {
-		// 	console.log("error"); 
-		// 	console.log(httpResponse.status);
-		// 	console.log(httpResponse.text);
-		// }
-    });
+		body : requestBody,
+		success : function(httpResponse){
+			console.log("success");
+			console.log(httpResponse.text);
+			promise.resolve(httpResponse);
+		},
+		error : function(httpResponse) {
+			console.log("error"); 
+			console.log(httpResponse.status);
+			console.log(httpResponse.text);
+			promise.reject(httpResponse);
+		}
+    }); 
+    return promise;
 }
 
 function deleteDocument(type, source) {
@@ -46,9 +48,7 @@ function deleteDocument(type, source) {
 	} else if (type === "list") {
 		endpoint = BASE_ENDPOINT.concat('index/list/single/').concat(source.id);
 	}
-	console.log(endpoint);
 	var requestBody = JSON.stringify(source);
-	console.log(requestBody);
 	Parse.Cloud.httpRequest({
 		method : "DELETE",
     	url : endpoint,
