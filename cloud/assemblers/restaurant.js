@@ -7,16 +7,16 @@ exports.assemble = function(source, lat, lon) {
 		restaurant['name'] = source.get('name');
 		restaurant['english_name'] = source.get('english_name');
 		restaurant['address'] = source.get('address');
-		if (lat != undefined && lon != undefined && source.get('coordinates') != undefined) {
-			var destination = new Parse.GeoPoint(lat, lon);
-			var distance = source.get('coordinates').milesTo(destination);
-			distance = distance.concat(' miles');
-			restaurant['distance'] = distance;
-		} else {
-			// TODO: delete me.
-			// mock distance for test use.
-			restaurant['distance'] = source.get('distance');
-		}
+		// if (lat != undefined && lon != undefined && source.get('coordinates') != undefined) {
+		// 	var destination = new Parse.GeoPoint(lat, lon);
+		// 	var distance = source.get('coordinates').milesTo(destination);
+		// 	distance = distance.concat(' miles');
+		// 	restaurant['distance'] = distance;
+		// } else {
+		// 	// TODO: delete me.
+		// 	// mock distance for test use.
+		// 	restaurant['distance'] = source.get('distance');
+		// }
 		
 		restaurant['favorite_count'] = source.get('favorite_count');
 		restaurant['like_count'] = source.get('like_count');
