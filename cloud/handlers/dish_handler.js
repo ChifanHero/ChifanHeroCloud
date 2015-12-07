@@ -10,7 +10,7 @@ Parse.Cloud.afterDelete('Dish', function(request){
 });
 
 function deleteRelatedRecords(dishDeleted) {
-	if (dish === undefined) {
+	if (dishDeleted === undefined) {
 		return;
 	} else {
 		var reviewQuery = new Parse.Query(Review);
@@ -34,15 +34,15 @@ function deleteRelatedRecords(dishDeleted) {
 	}
 }
 
-function deleteDishFromIndex(dish) {
-	if (dish === undefined) {
+function deleteDishFromIndex(dishDeleted) {
+	if (dishDeleted === undefined) {
 		return;
 	}
 	indexer.deleteDish(dishDeleted);
 }
 
-function reindexRestaurant(dish) {
-	if (dish === undefined) {
+function reindexRestaurant(dishDeleted) {
+	if (dishDeleted === undefined) {
 		return;
 	}
 	var restaurant = dishDeleted.get('from_restaurant');

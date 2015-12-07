@@ -22,31 +22,40 @@ exports.rateByUserSession = function(req, res){
 		}
 		var rating = new Rating();
 		if (type === 'dish') {
-			var dish = new Dish();
-			dish.id = objectId;
+			var dish = {
+		        __type: "Pointer",
+		        className: "Dish",
+		        objectId: objectId
+		    };
 			rating.set('type', type);
 			rating.set('action', action);
 			rating.set('user', user);
 			rating.set('dish', dish);
 		} else if (type === 'restaurant') {
-			var restaurant = new Restaurant();
-			restaurant.id = objectId;
+			var restaurant = {
+		        __type: "Pointer",
+		        className: "Restaurant",
+		        objectId: objectId
+		    };
 			rating.set('type', type);
 			rating.set('action', action);
 			rating.set('user', user);
 			rating.set('restaurant', restaurant);
 		} else if (type === 'list') {
-			var list = new List();
-			list.id = objectId;
+			var list = {
+		        __type: "Pointer",
+		        className: "List",
+		        objectId: objectId
+		    };
 			rating.set('type', type);
 			rating.set('action', action);
 			rating.set('user', user);
 			rating.set('list', list);
 		}
 		rating.save().then(function(_rating){
-			var rev = rating_assembler.assemble(_rating);
+			var ratingRes = rating_assembler.assemble(_rating);
 			var response = {};
-			response['result'] = rev;
+			response['result'] = ratingRes;
 			res.json(201, response);
 		}, function(error){
 			error_handler.handle(error, {}, res);

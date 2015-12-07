@@ -65,7 +65,6 @@ app.post('/ratings', rating_manager.rateByUserSession);
 app.post('/favorites', favorite_manager.addByUserSession);
 app.post('/candidates', candidate_manager.nominate);
 app.post('/images', image_manager.upload);
-//app.post('/restaurant/:id', restaurant_manager.rate);
 
 //PUT
 
