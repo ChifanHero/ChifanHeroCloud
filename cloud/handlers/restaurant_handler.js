@@ -4,7 +4,6 @@ var Review = Parse.Object.extend('Review');
 var Favorite = Parse.Object.extend('Favorite');
 var Dish = Parse.Object.extend('Dish');
 var Menu = Parse.Object.extend('MenuItem');
-var indexer = require('cloud/indexer');
 
 Parse.Cloud.beforeSave('Restaurant', function(request, response){
 	var restaurantToSave = request.object;
@@ -25,25 +24,12 @@ Parse.Cloud.beforeSave('Restaurant', function(request, response){
 	}
 }); 
 
-Parse.Cloud.afterSave('Restaurant', function(request) {
-	var restaurant = request.object;
-	indexer.indexRestaurant(restaurant);
-
-});
 
 Parse.Cloud.afterDelete('Restaurant', function(request) {
  	var restaurant = request.object;
- 	deleteRestaurantFromIndex(restaurant);
- 	deleteRelatedRecords(restaurant);
-	
+ 	deleteRelatedRecords(restaurant);	
 });
 
-function deleteRestaurantFromIndex(restaurant) {
-	if (restaurant === undefined) {
-		return;
-	}
-	indexer.deleteRestaurant(restaurant);
-}
 
 function deleteRelatedRecords(restaurant) {
 	if (restaurant === undefined) {
