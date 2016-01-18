@@ -46,7 +46,7 @@ app.get('/messages/:id', message_manager.findById);
 app.get('/lists', list_manager.listAll);
 app.get('/lists/:id', list_manager.findById);
 
-app.get('/promotions', promotion_manager.listAll);
+app.post('/promotions', promotion_manager.listAll);
 
 app.get('/dishes', dish_manager.findByRestaurantId);
 app.get('/dishes/:id', dish_manager.findById);
