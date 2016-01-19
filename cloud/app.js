@@ -35,7 +35,7 @@ app.use(function(req, res, next){
 });
 
 //GET
-app.get('/restaurants', restaurant_manager.listAll);
+app.post('/restaurants', restaurant_manager.listAll);
 app.get('/restaurants/:id', restaurant_manager.findById);
 app.get('/restaurants/:id/menus', menu_manager.findByRestaurantId);
 

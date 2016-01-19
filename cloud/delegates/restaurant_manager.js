@@ -7,14 +7,57 @@ var dish_assembler = require('cloud/assemblers/dish');
 var error_handler = require('cloud/error_handler');
 
 exports.listAll = function(req, res) {
+	var userLocation = req.body['user_location'];
+	var skip = req.body["skip"];
+	var limit = req.body["limit"];
+	if (limit == undefined) {
+		limit = 10;
+	}
+	var sortBy = req.body["sort_by"];
+	var sortOrder = req.body["sort_order"];
+	var userGeoPoint;
+	if (userLocation != undefined && userLocation.lat != undefined && userLocation.lon != undefined) {
+		userGeoPoint = new Parse.GeoPoint(userLocation.lat, userLocation.lon);
+	}
 	var query = new Parse.Query(Restaurant);
 	query.include('picture');
+	if (userGeoPoint != undefined) {
+		query.withinMiles("coordinates", userGeoPoint, 100);
+	}
+	if (skip != undefined) {
+		query.skip(skip);
+	}
+	if (limit != undefined) {
+		query.limit(limit);
+	}
+	if (sortBy == "hotness") {
+		if (sortOrder == "ascend") {
+			query.ascending("like_count");
+		} else {
+			query.descending("like_count");
+		}
+	} else if (sortBy == "distance" && userGeoPoint != undefined) {
+		query.near("coordinates", userGeoPoint);
+	}
 	query.find().then(function(results) {
 		var response = {};
 		var restaurants = [];
+		var lat;
+		var lon;
+		if (userLocation != undefined) {
+			lat = userLocation["lat"];
+			lon = userLocation["lon"];
+		}
 		_.each(results, function(result){
-			var restaurant = restaurant_assembler.assemble(result);
+			var restaurant = restaurant_assembler.assemble(result, lat, lon);
 			restaurants.push(restaurant);
+		});
+		_.sortBy(restaurants, function(rest) {
+			if (rest.distance != undefined && rest.distance.value != undefined) {
+				return 0 - rest.distance.value;
+			} else {
+				return 0;
+			}
 		});
 		response['results'] = restaurants;
 		res.json(200, response)

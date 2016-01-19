@@ -12,6 +12,11 @@ var restaurant_assembler = require('cloud/assemblers/restaurant');
 exports.listAll = function(req, res) {
 	// var userLocation = req.body['user_location'];
 	var userLocation = req.body['user_location'];
+	var skip = req.body["skip"];
+	var limit = req.body["limit"];
+	if (limit == undefined) {
+		limit = 10;
+	}
 	var userGeoPoint;
 	if (userLocation != undefined && userLocation.lat != undefined && userLocation.lon != undefined) {
 		userGeoPoint = new Parse.GeoPoint(userLocation.lat, userLocation.lon);
@@ -32,14 +37,14 @@ exports.listAll = function(req, res) {
 				promotions.push(promotion);
 			});
 		}
-		if (promotions.length < 10) {
+		if (promotions.length < limit) {
 			var existingIds = [];
 			for (var i = 0; i < promotions.length; i++) {
 				if (promotions[i].restaurant != null) {
 					existingIds.push[promotions[i].restaurant.id];
 				}
 			}
-			var countShort = 10;
+			var countShort = limit;
 			var restaurantQuery = new Parse.Query(Restaurant);
 			restaurantQuery.limit(countShort);
 			if (userGeoPoint != undefined) {
