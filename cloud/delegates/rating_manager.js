@@ -9,58 +9,52 @@ var error_handler = require('cloud/error_handler');
 
 exports.rateByUserSession = function(req, res){
 	var user = req.user;
-	if (user == undefined) {
-		var error = {};
-		error['message'] = 'Please sign in to perform this operation';
-		res.json(401, error);
-	} else {
-		var type = req.body['type'];
-		var action = req.body['action'];
-		var objectId = req.body['object_id'];
-		if (!validateParameters(type, action, res)) {
-			return;
-		}
-		var rating = new Rating();
-		if (type === 'dish') {
-			var dish = {
-		        __type: "Pointer",
-		        className: "Dish",
-		        objectId: objectId
-		    };
-			rating.set('type', type);
-			rating.set('action', action);
-			rating.set('user', user);
-			rating.set('dish', dish);
-		} else if (type === 'restaurant') {
-			var restaurant = {
-		        __type: "Pointer",
-		        className: "Restaurant",
-		        objectId: objectId
-		    };
-			rating.set('type', type);
-			rating.set('action', action);
-			rating.set('user', user);
-			rating.set('restaurant', restaurant);
-		} else if (type === 'list') {
-			var list = {
-		        __type: "Pointer",
-		        className: "List",
-		        objectId: objectId
-		    };
-			rating.set('type', type);
-			rating.set('action', action);
-			rating.set('user', user);
-			rating.set('list', list);
-		}
-		rating.save().then(function(_rating){
-			var ratingRes = rating_assembler.assemble(_rating);
-			var response = {};
-			response['result'] = ratingRes;
-			res.json(201, response);
-		}, function(error){
-			error_handler.handle(error, {}, res);
-		});
+	var type = req.body['type'];
+	var action = req.body['action'];
+	var objectId = req.body['object_id'];
+	if (!validateParameters(type, action, res)) {
+		return;
 	}
+	var rating = new Rating();
+	if (type === 'dish') {
+		var dish = {
+	        __type: "Pointer",
+	        className: "Dish",
+	        objectId: objectId
+	    };
+		rating.set('type', type);
+		rating.set('action', action);
+		rating.set('user', user);
+		rating.set('dish', dish);
+	} else if (type === 'restaurant') {
+		var restaurant = {
+	        __type: "Pointer",
+	        className: "Restaurant",
+	        objectId: objectId
+	    };
+		rating.set('type', type);
+		rating.set('action', action);
+		rating.set('user', user);
+		rating.set('restaurant', restaurant);
+	} else if (type === 'list') {
+		var list = {
+	        __type: "Pointer",
+	        className: "List",
+	        objectId: objectId
+	    };
+		rating.set('type', type);
+		rating.set('action', action);
+		rating.set('user', user);
+		rating.set('list', list);
+	}
+	rating.save().then(function(_rating){
+		var ratingRes = rating_assembler.assemble(_rating);
+		var response = {};
+		response['result'] = ratingRes;
+		res.json(201, response);
+	}, function(error){
+		error_handler.handle(error, {}, res);
+	});
 }
 
 function validateParameters(type, action, res) {

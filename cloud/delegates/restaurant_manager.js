@@ -1,4 +1,5 @@
 var Restaurant = Parse.Object.extend('Restaurant');
+var RestaurantCandidate = Parse.Object.extend('RestaurantCandidate');
 var Dish = Parse.Object.extend('Dish');
 var _ = require('underscore');
 var Coupon = Parse.Object.extend('Coupon');
@@ -97,6 +98,57 @@ exports.findById = function(req, res) {
 	}, function(error) {
 		error_handler.handle(error, {}, res);
 	});
+}
+
+exports.vote = function(req, res) {
+	var id = req.body['restaurant_id'];
+	if (id === undefined) {
+		var error = {};
+		error['message'] = 'Please provide restaurant id';
+		res.json(401, error);
+		return;
+	} else {
+		var checkQuery = new Parse.Query(Restaurant);
+		checkQuery.get(id).then(function(rest){
+			
+			var candidateQuery = new Parse.Query(RestaurantCandidate);
+			candidateQuery.equalTo('restaurant', rest);
+			candidateQuery.find(function(candidates) {
+				if (candidates.length == 0) {
+					var candidate = new RestaurantCandidate();
+					candidate.set('restaurant', rest);
+					candidate.set('votes', 1);
+					candidate.save().then(function(outcome){
+						var response = {};
+						var created = {};
+						created['id'] = outcome.id;
+						response['result'] = created;
+						res.json(200, response);
+					}, function(error){
+						error_handler.handle(error, {}, res);
+					});
+				} else {
+					var existingCandidate = candidates[0];
+					existingCandidate.increment("votes");
+					existingCandidate.save().then(function(outcome){
+						var response = {};
+						var created = {};
+						created['id'] = outcome.id;
+						response['result'] = created;
+						res.json(200, response);
+					}, function(error) {
+						error_handler.handle(error, {}, res);
+					});
+				}
+			}, function(error) {
+				error_handler.handle(error, {}, res);
+			});
+		}, function(){
+			var error = {};
+			error['message'] = 'restaurant not found';
+			res.json(404, error);
+		});
+	}
 }
 
 exports.rate = function(req, res){
