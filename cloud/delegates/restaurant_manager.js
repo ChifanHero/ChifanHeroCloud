@@ -83,18 +83,60 @@ exports.findById = function(req, res) {
 			});
 		}
 		restaurant['hot_dishes'] = dishes;
-		var coupons = [];
-		if (_coupons != undefined && _coupons.length > 0) {
-			_.each(_coupons, function(_coupon){
-				var coupon = {};
-				coupon['id'] = _coupon.id;
-				coupons.push(coupon);
+		if (dishes.length == 0) {
+			var candidateQuery = new Parse.Query(RestaurantCandidate);
+			candidateQuery.equalTo('restaurant', _restaurant);
+			candidateQuery.find(function(candidates){
+				var votes = 0;
+				if (candidates != undefined && candidates.length > 0) {
+					var candidate = candidates[0];
+					if (candidate.get('votes') != undefined && candidate.get('votes') > 0) {
+						votes = candidate.get('votes');
+					}
+				}
+				restaurant['votes'] = votes;
+				var coupons = [];
+				if (_coupons != undefined && _coupons.length > 0) {
+					_.each(_coupons, function(_coupon){
+						var coupon = {};
+						coupon['id'] = _coupon.id;
+						coupons.push(coupon);
+					});
+				}
+				restaurant['coupons'] = coupons;
+				var response = {};
+				response['result'] = restaurant;
+				res.json(200, response);
+			}, function(error){
+				var coupons = [];
+				if (_coupons != undefined && _coupons.length > 0) {
+					_.each(_coupons, function(_coupon){
+						var coupon = {};
+						coupon['id'] = _coupon.id;
+						coupons.push(coupon);
+					});
+				}
+				restaurant['votes'] = 0;
+				restaurant['coupons'] = coupons;
+				var response = {};
+				response['result'] = restaurant;
+				res.json(200, response);
 			});
+		} else {
+			var coupons = [];
+			if (_coupons != undefined && _coupons.length > 0) {
+				_.each(_coupons, function(_coupon){
+					var coupon = {};
+					coupon['id'] = _coupon.id;
+					coupons.push(coupon);
+				});
+			}
+			restaurant['coupons'] = coupons;
+			var response = {};
+			response['result'] = restaurant;
+			res.json(200, response);
 		}
-		restaurant['coupons'] = coupons;
-		var response = {};
-		response['result'] = restaurant;
-		res.json(200, response);
+		
 	}, function(error) {
 		error_handler.handle(error, {}, res);
 	});
@@ -122,6 +164,7 @@ exports.vote = function(req, res) {
 						var response = {};
 						var created = {};
 						created['id'] = outcome.id;
+						created['votes'] = outcome.get('votes');
 						response['result'] = created;
 						res.json(200, response);
 					}, function(error){
@@ -134,6 +177,7 @@ exports.vote = function(req, res) {
 						var response = {};
 						var created = {};
 						created['id'] = outcome.id;
+						created['votes'] = outcome.get('votes');
 						response['result'] = created;
 						res.json(200, response);
 					}, function(error) {
