@@ -20,6 +20,7 @@ Parse.Cloud.beforeSave('ListCandidate', function(request, response){
 	}
 	Parse.Promise.when(tasks).then(function(members, candidates){
 		console.log('inside');
+		console.log('members.length');
 		if (members != undefined && members.length > 0){
 			response.error('This dish is already in the list');
 			return;
@@ -30,6 +31,7 @@ Parse.Cloud.beforeSave('ListCandidate', function(request, response){
 			var existingCandidate = candidates[0];
 			existingCandidate.increment('count', 1);
 			existingCandidate.save();
+			// response.success();
 			response.error('Object exists and not allowed to be redundant');
 			return;
 		}
@@ -69,7 +71,7 @@ function findListCandidate(dish, list){
 Parse.Cloud.afterSave('ListCandidate', function(request){
 	var candidate = request.object;
 	var count = candidate.get('count');
-	if (count > 50) {
+	if (count > 10) {
 		var dish = candidate.get('dish');
 		dish.fetch().then(function(dish){
 			var score = dish.get('score');
