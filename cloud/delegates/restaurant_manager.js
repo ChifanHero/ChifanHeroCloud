@@ -232,7 +232,7 @@ exports.rate = function(req, res){
 
 function findRestaurantById(id) {
 	var query = new Parse.Query(Restaurant);
-	query.include('picture');
+	query.include('image');
 	return query.get(id);
 }
 
@@ -241,7 +241,7 @@ function findHotDishesByRestaurantId(id) {
 	rest.id = id;
 	var query = new Parse.Query(Dish);
 	query.equalTo('from_restaurant', rest);
-	query.include('picture');
+	query.include('image');
 	query.limit(10);
 	return query.find();
 }
