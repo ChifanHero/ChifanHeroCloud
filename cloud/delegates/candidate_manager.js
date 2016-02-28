@@ -31,7 +31,9 @@ exports.nominate = function(req, res){
 		}
 	}).then(function(_candidate) {
 		var candidate = candidate_assembler.assemble(_candidate);
-		res.json(201, candidate);
+		var response = {};
+		response["result"] = candidate;
+		res.json(201, response);
 	}, function(error) {
 		error_handler.handle(error, {}, res);
 	});

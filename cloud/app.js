@@ -63,7 +63,7 @@ app.post('/users/update', user_manager.update);
 app.post('/users/logOut', user_manager.logOut);
 app.post('/ratings', rating_manager.rateByUserSession);
 app.post('/favorites', favorite_manager.addByUserSession);
-app.post('/candidates', candidate_manager.nominate);
+app.post('/lists/candidates', candidate_manager.nominate);
 app.post('/images', image_manager.upload);
 app.post('/restaurantCandidates', restaurant_manager.vote)
 

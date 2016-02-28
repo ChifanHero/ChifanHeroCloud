@@ -80,6 +80,8 @@ Parse.Cloud.afterSave('ListCandidate', function(request){
 			listMember.set('dish', dish);
 			listMember.set('list', list);
 			listMember.set('score', score);
+			list.increment("member_count");
+			list.save();
 			listMember.save();
 		});
 		candidate.destroy();
