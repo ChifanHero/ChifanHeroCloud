@@ -22,7 +22,8 @@ exports.listAll = function(req, res) {
 		userGeoPoint = new Parse.GeoPoint(userLocation.lat, userLocation.lon);
 	}
 	var query = new Parse.Query(Promotion);
-	query.include('restaurant.picture');
+	query.include('restaurant'); 
+	query.include('restaurant.image'); 
 	query.include('dish.from_restaurant');
 	query.include('dish.picture');
 	query.include('coupon.restaurant.picture');
@@ -51,6 +52,7 @@ exports.listAll = function(req, res) {
 				restaurantQuery.withinMiles("coordinates", userGeoPoint, 50); 
 			}
 			restaurantQuery.descending("like_count");
+			restaurantQuery.include("image");
 			restaurantQuery.find().then(function(restaurants){
 				if (restaurants != undefined && restaurants.length > 0) {
 					for (var i = 0; i < restaurants.length; i++) { 
@@ -64,6 +66,7 @@ exports.listAll = function(req, res) {
 								lon = userLocation["lon"];
 							}
 							var rest = restaurant_assembler.assemble(restaurant, lat, lon);
+							console.log(restaurant);
 							promotion["restaurant"] = rest;
 							promotions.push(promotion);
 							if (promotions.length == 10) {
