@@ -21,7 +21,7 @@ exports.listAll = function(req, res) {
 		userGeoPoint = new Parse.GeoPoint(userLocation.lat, userLocation.lon);
 	}
 	var query = new Parse.Query(Restaurant);
-	query.include('picture');
+	query.include('image');
 	if (userGeoPoint != undefined) {
 		query.withinMiles("coordinates", userGeoPoint, 100);
 	}

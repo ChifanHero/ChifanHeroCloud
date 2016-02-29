@@ -22,10 +22,9 @@ exports.listAll = function(req, res) {
 		userGeoPoint = new Parse.GeoPoint(userLocation.lat, userLocation.lon);
 	}
 	var query = new Parse.Query(Promotion);
-	query.include('restaurant'); 
-	query.include('restaurant.image'); 
+	query.include('restaurant.image');
 	query.include('dish.from_restaurant');
-	query.include('dish.picture');
+	query.include('dish.image');
 	query.include('coupon.restaurant.picture');
 	if (userGeoPoint != undefined) {
 		query.withinMiles("coordinates", userGeoPoint, 50); 
