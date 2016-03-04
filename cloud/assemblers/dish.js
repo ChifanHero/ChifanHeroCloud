@@ -1,5 +1,6 @@
 var restaurant = require('cloud/assemblers/restaurant');
 var image_assembler = require('cloud/assemblers/image');
+var restaurant_assembler = require('cloud/assemblers/restaurant');
 
 exports.assemble = function(source) {
 	var dish = {};
@@ -12,14 +13,14 @@ exports.assemble = function(source) {
 		dish['dislike_count'] = source.get('dislike_count');
 		dish['neutral_count'] = source.get('neutral_count');
 		dish['picture'] = image_assembler.assemble(source.get('image'));
-		var restaurant = {};
-		if (source.get('from_restaurant') != undefined) {
-			var rest = source.get('from_restaurant');
-			restaurant['id'] = rest.id;
-			restaurant['name'] = rest.get('name');
-			restaurant['english_name'] = rest.get('english_name');
-		}
-		dish['from_restaurant'] = restaurant;
+		// var restaurant = {};
+		// if (source.get('from_restaurant') != undefined) {
+		// 	var rest = source.get('from_restaurant');
+		// 	restaurant['id'] = rest.id;
+		// 	restaurant['name'] = rest.get('name');
+		// 	restaurant['english_name'] = rest.get('english_name');
+		// }
+		dish['from_restaurant'] = restaurant_assembler.assemble(source.get('from_restaurant'));
 	}
 	return dish;
 }
