@@ -8,6 +8,7 @@ var dish_assembler = require('cloud/assemblers/dish');
 exports.listAll = function(req, res) {
 	var query = new Parse.Query(List);
 	query.include('image');
+	query.equalTo('published', true);
 	query.find().then(function(results) {
 		var lists = [];
 		if(results != undefined && results.length > 0) {

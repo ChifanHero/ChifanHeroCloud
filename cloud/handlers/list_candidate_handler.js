@@ -1,5 +1,6 @@
 var ListMember = Parse.Object.extend('ListMember');
 var ListCandidate = Parse.Object.extend('ListCandidate');
+var Dish = Parse.Object.extend('Dish');
 
 Parse.Cloud.beforeSave('ListCandidate', function(request, response){
 	var candidate = request.object;
@@ -14,31 +15,39 @@ Parse.Cloud.beforeSave('ListCandidate', function(request, response){
 		candidate.set('count', 1);
 	}
 	var tasks = []; 
-	tasks.push(findListMember(dish, list));
 	if (candidate.dirty('dish') || candidate.dirty('list')) {
-		tasks.push(findListCandidate(dish, list));
-	}
-	Parse.Promise.when(tasks).then(function(members, candidates){
-		console.log('inside');
-		console.log('members.length');
-		if (members != undefined && members.length > 0){
-			response.error('This dish is already in the list');
-			return;
-		}
-		console.log('candidates: '.concat(candidates));
-		if (candidates != undefined && candidates.length >0){
-			console.log('found');
-			var existingCandidate = candidates[0];
-			existingCandidate.increment('count', 1);
-			existingCandidate.save();
-			// response.success();
-			response.error('Object exists and not allowed to be redundant');
-			return;
-		}
+		validateCandidateLocation(dish, list).then(function() {
+			tasks.push(findListMember(dish, list));
+			tasks.push(findListCandidate(dish, list));
+			Parse.Promise.when(tasks).then(function(members, candidates){
+				console.log('inside');
+				console.log('members.length');
+				if (members != undefined && members.length > 0){
+					response.error('This dish is already in the list');
+					return;
+				}
+				console.log('candidates: '.concat(candidates));
+				if (candidates != undefined && candidates.length >0){
+					console.log('found');
+					var existingCandidate = candidates[0];
+					existingCandidate.increment('count', 1);
+					existingCandidate.save();
+					// response.success();
+					response.error('Object exists and not allowed to be redundant');
+					return;
+				}
+				response.success();
+			}, function(error){
+				response.error(error);
+			});
+		}, function() {
+			response.error("The dish is beyond the range of the list");
+		});
+	} else {
 		response.success();
-	}, function(error){
-		response.error(error);
-	});
+	}
+	
+	
 	
 });
 
@@ -64,6 +73,31 @@ function findListCandidate(dish, list){
 		promise.resolve(candidates);
 	}, function(error){
 		promise.reject(error);
+	});
+	return promise;
+}
+
+function validateCandidateLocation(dish, list) {
+	var promise = new Parse.Promise();
+	var tasks = []; 
+	tasks.push(list.fetch());
+	var dishQuery = new Parse.Query(Dish);
+	dishQuery.include('from_restaurant');
+	tasks.push(dishQuery.get(dish.id));
+	Parse.Promise.when(tasks).then(function(list, dish){
+		var listLocation = list.get("center_location");
+		var dishLocation = dish.get('from_restaurant').get('coordinates');
+		if (listLocation != undefined && dishLocation != undefined) {
+			if (listLocation.milesTo(dishLocation) > 50) {
+				promise.reject();
+			} else {
+				promise.resolve();
+			}
+		} else {
+			promise.resolve();
+		}
+	}, function() {
+		promise.resolve();
 	});
 	return promise;
 }
