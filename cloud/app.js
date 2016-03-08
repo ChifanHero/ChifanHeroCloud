@@ -35,7 +35,7 @@ app.use(function(req, res, next){
 });
 
 //GET
-app.post('/restaurants', restaurant_manager.listAll);
+
 app.get('/restaurants/:id', restaurant_manager.findById);
 app.get('/restaurants/:id/menus', menu_manager.findByRestaurantId);
 
@@ -43,10 +43,10 @@ app.get('/restaurants/:id/menus', menu_manager.findByRestaurantId);
 app.get('/messages', message_manager.listAll);
 app.get('/messages/:id', message_manager.findById);
 
-app.get('/lists', list_manager.listAll);
+
 app.get('/lists/:id', list_manager.findById);
 
-app.post('/promotions', promotion_manager.listAll);
+
 
 app.get('/dishes', dish_manager.findByRestaurantId);
 app.get('/dishes/:id', dish_manager.findById);
@@ -57,6 +57,9 @@ app.get('/favorites', favorite_manager.findByUserSession);
 
 
 //POST
+app.post('/lists', list_manager.listAll);
+app.post('/restaurants', restaurant_manager.listAll);
+app.post('/promotions', promotion_manager.listAll);
 app.post('/users/signUp', user_manager.signUp);
 app.post('/users/logIn', user_manager.logIn);
 app.post('/users/update', user_manager.update);

@@ -6,9 +6,30 @@ var error_handler = require('cloud/error_handler');
 var dish_assembler = require('cloud/assemblers/dish');
 
 exports.listAll = function(req, res) {
+	var userLocation = req.body['user_location'];
 	var query = new Parse.Query(List);
+	var skip = req.body["skip"];
+	var limit = req.body["limit"];
+	if (limit == undefined) {
+		limit = 10;
+	}
+	var userGeoPoint;
+	if (userLocation != undefined && userLocation.lat != undefined && userLocation.lon != undefined) {
+		userGeoPoint = new Parse.GeoPoint(userLocation.lat, userLocation.lon);
+	}
 	query.include('image');
 	query.equalTo('published', true);
+	query.exists('image');
+	if (userGeoPoint != undefined) {
+		query.withinMiles("center_location", userGeoPoint, 50);
+	}
+	if (skip != undefined) {
+		query.skip(skip);
+	}
+	if (limit != undefined) {
+		query.limit(limit);
+	}
+	query.descending("like_count");
 	query.find().then(function(results) {
 		var lists = [];
 		if(results != undefined && results.length > 0) {
