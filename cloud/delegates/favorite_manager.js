@@ -81,8 +81,11 @@ exports.findByUserSession = function(req, res){
 	query.limit(10);
 
 	query.include('dish.from_restaurant');
+	query.include('dish.image');
 	query.include('restaurant');
+	query.include('restaurant.image');
 	query.include('list');
+	query.include('list.image');
 
 	query.find().then(function(results) {
 		var reviews = [];
