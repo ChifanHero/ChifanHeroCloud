@@ -74,8 +74,26 @@ exports.listAll = function(req, res) {
 						}
 					}
 				}
+				console.log("before sorting 1");
+				console.log("before sort" + promotions);
+				var sortedPromotions = _.sortBy(promotions, function(promotion) {
+					console.log("sorting");
+					if (promotion['restaurant'] != undefined) {
+						var rest = promotion['restaurant'];
+						if (rest.distance != undefined && rest.distance.value != undefined) {
+							console.log("return 1");
+							return 0 - rest.distance.value;
+						} else {
+							console.log("return 0")
+							return 0;
+						}
+					} else {
+						return 0;
+					}
+				}).reverse();
+				console.log("after sort" + promotions);
 				var response = {};
-				response['results'] = promotions;
+				response['results'] = sortedPromotions;
 				res.json(200, response);
 			}, function(error){
 				error_handler.handle(error, {}, res);
@@ -83,7 +101,20 @@ exports.listAll = function(req, res) {
 
 		} else {
 			var response = {};
-			response['results'] = promotions;
+			console.log("before sorting 2");
+			var sortedPromotions = _.sortBy(promotions, function(promotion) {
+				if (promotion['restaurant'] != undefined) {
+					var rest = promotion['restaurant'];
+					if (rest.distance != undefined && rest.distance.value != undefined) {
+						return 0 - rest.distance.value;
+					} else {
+						return 0;
+					}
+				} else {
+					return 0;
+				}
+			}).reverse();
+			response['results'] = sortedPromotions;
 			res.json(200, response);
 		}
 		

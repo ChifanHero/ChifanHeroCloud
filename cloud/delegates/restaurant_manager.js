@@ -53,13 +53,13 @@ exports.listAll = function(req, res) {
 			var restaurant = restaurant_assembler.assemble(result, lat, lon);
 			restaurants.push(restaurant);
 		});
-		_.sortBy(restaurants, function(rest) {
-			if (rest.distance != undefined && rest.distance.value != undefined) {
-				return 0 - rest.distance.value;
-			} else {
-				return 0;
-			}
-		});
+		// _.sortBy(restaurants, function(rest) {
+		// 	if (rest.distance != undefined && rest.distance.value != undefined) {
+		// 		return 0 - rest.distance.value;
+		// 	} else {
+		// 		return 0;
+		// 	}
+		// }); 
 		response['results'] = restaurants;
 		res.json(200, response)
 	}, function(error) {
@@ -242,6 +242,7 @@ function findHotDishesByRestaurantId(id) {
 	var query = new Parse.Query(Dish);
 	query.equalTo('from_restaurant', rest);
 	query.include('image');
+	query.descending("like_count");
 	query.limit(10);
 	return query.find();
 }
