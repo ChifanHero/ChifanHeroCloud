@@ -1,13 +1,13 @@
 var restaurant_assembler = require('cloud/assemblers/restaurant');
 var dish_assembler = require('cloud/assemblers/dish');
 
-exports.assemble = function(source){
+exports.assemble = function(source, lat, lon){
 	var promotion = {};
 	if (source != undefined) {
 		promotion.id = source.id;
 		promotion.type = source.get('type');
 		if (source.get('restaurant') != undefined) {
-			var restaurant = restaurant_assembler.assemble(source.get('restaurant'));
+			var restaurant = restaurant_assembler.assemble(source.get('restaurant'), lat, lon);
 			promotion['restaurant'] = restaurant;
 		}
 		if (source.get('dish') != undefined) {

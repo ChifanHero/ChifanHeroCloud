@@ -26,14 +26,21 @@ exports.listAll = function(req, res) {
 	query.include('dish.from_restaurant');
 	query.include('dish.image');
 	query.include('coupon.restaurant.picture');
+	query.limit(limit);
 	if (userGeoPoint != undefined) {
 		query.withinMiles("coordinates", userGeoPoint, 50); 
 	}
 	query.find().then(function(results) {
 		var promotions = [];
 		if (results != undefined && results.length > 0) {
+			var lat;
+			var lon;
+			if (userLocation != undefined) {
+				lat = userLocation["lat"];
+				lon = userLocation["lon"];
+			}
 			_.each(results, function(result){
-				var promotion = promotion_assembler.assemble(result);
+				var promotion = promotion_assembler.assemble(result, lat, lon);
 				promotions.push(promotion);
 			});
 		}
