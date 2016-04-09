@@ -126,6 +126,7 @@ exports.listAll = function(req, res) {
 		}
 		
 	}, function(error) {
+		console.log(error);
 		error_handler.handle(error, {}, res);
 	})
 }

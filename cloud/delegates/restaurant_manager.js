@@ -6,6 +6,7 @@ var Coupon = Parse.Object.extend('Coupon');
 var restaurant_assembler = require('cloud/assemblers/restaurant');
 var dish_assembler = require('cloud/assemblers/dish');
 var error_handler = require('cloud/error_handler');
+var image_assembler = require('cloud/assemblers/image');
 
 exports.listAll = function(req, res) {
 	var userLocation = req.body['user_location'];
@@ -253,4 +254,41 @@ function findCouponByRestaurantId(id) {
 	var query = new Parse.Query(Coupon);
 	query.equalTo('active', true);
 	return query.find();
+}
+
+exports.update = function(req, res) {
+	var id = req.params.id;
+	var restaurant = new Restaurant();
+	restaurant.id = id;
+	var imageId = req.body["image_id"];
+	if(imageId != undefined){
+		var picture = {
+	        __type: "Pointer",
+	        className: "Image",
+	        objectId: imageId
+	    };
+		restaurant.set('image', picture)
+	}
+	restaurant.save().then(function(_restaurant){
+		var restaurant = restaurant_assembler.assemble(_restaurant);
+		var image = _restaurant.get('image');
+		if (image != undefined) {
+			image.fetch().then(function(_image){
+				var imageRes = image_assembler.assemble(_image);
+				var response = {};
+				restaurant['picture'] = imageRes;
+				response['result'] = restaurant;
+				res.json(200, response);
+			}, function(error){
+				error_handler.handle(error, {}, res);
+			});
+		} else {
+			var response = {};
+			response['result'] = restaurant;
+			res.json(200, response);
+		}
+	}, function(error) {
+		error_handler.handle(error, {}, res);
+	});
+ 
 }

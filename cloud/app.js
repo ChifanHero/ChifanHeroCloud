@@ -68,9 +68,10 @@ app.post('/ratings', rating_manager.rateByUserSession);
 app.post('/favorites', favorite_manager.addByUserSession);
 app.post('/lists/candidates', candidate_manager.nominate);
 app.post('/images', image_manager.upload);
-app.post('/restaurantCandidates', restaurant_manager.vote)
+app.post('/restaurantCandidates', restaurant_manager.vote);
 
 //PUT
+app.put('/restaurants/:id', restaurant_manager.update); 
 
 //DELETE
 app.delete('/favorites', favorite_manager.deleteByUserSession); 

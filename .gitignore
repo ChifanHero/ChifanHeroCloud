@@ -2,3 +2,4 @@
 /Lightning.sublime-workspace
 *.sublime-project
 *.DS_Store
+*.parse.local
