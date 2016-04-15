@@ -35,13 +35,13 @@ Parse.Cloud.beforeSave('Restaurant', function(request, response){
 					console.log("successfully deleted old image");
 					response.success();
 				}, function(error){
-					response.reject(error);
+					response.success(); 
 				});
 			} else {
 				response.success();
 			}
 		}, function(error) {
-			response.reject(error);
+			response.error(error);
 		});
 	} else {
 		response.success();

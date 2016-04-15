@@ -20,7 +20,7 @@ Parse.Cloud.beforeSave(Parse.User, function(request, response) {
 						console.log("successfully deleted old image");
 						response.success();
 					}, function(error){
-						response.reject(error);
+						response.success();
 					});
 				} else {
 					response.success();

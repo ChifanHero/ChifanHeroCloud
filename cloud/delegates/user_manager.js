@@ -20,7 +20,8 @@ exports.logIn = function(req, res){
 				response['user'] = user;
 				res.json(200, response);
 			}, function(error){
-				error_handler.handle(error, {}, res);
+				response['user'] = user;
+				res.json(200, response);
 			});
 		} else {
 			response['user'] = user;
