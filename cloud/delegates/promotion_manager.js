@@ -26,7 +26,7 @@ exports.listAll = function(req, res) {
 	query.include('dish.from_restaurant');
 	query.include('dish.image');
 	query.include('coupon.restaurant.picture');
-	query.limit(limit);
+	// query.limit(limit);
 	if (userGeoPoint != undefined) {
 		query.withinMiles("coordinates", userGeoPoint, 50); 
 	}
@@ -40,17 +40,26 @@ exports.listAll = function(req, res) {
 				lon = userLocation["lon"];
 			}
 			_.each(results, function(result){
-				var promotion = promotion_assembler.assemble(result, lat, lon);
-				promotions.push(promotion);
+				if (result.get('restaurant') != undefined) {
+					if (result.get('restaurant').get('image') != undefined) {
+						var promotion = promotion_assembler.assemble(result, lat, lon);
+						promotions.push(promotion);
+					}
+				}
+				
+				
 			});
 		}
 		if (promotions.length < limit) {
+			console.log("promotions length is ".concat(promotions.length));
 			var existingIds = [];
 			for (var i = 0; i < promotions.length; i++) {
-				if (promotions[i].restaurant != null) {
-					existingIds.push[promotions[i].restaurant.id];
+				if (promotions[i].restaurant != undefined) {
+					existingIds.push(promotions[i].restaurant.id);
+					console.log("existingIds adding ".concat(promotions[i].restaurant.id));
 				}
 			}
+			console.log("existingIds length is ".concat(existingIds.length));
 			var countShort = limit;
 			var restaurantQuery = new Parse.Query(Restaurant);
 			restaurantQuery.limit(countShort);
@@ -59,11 +68,13 @@ exports.listAll = function(req, res) {
 			}
 			restaurantQuery.descending("like_count");
 			restaurantQuery.include("image");
+			restaurantQuery.exists("image");
 			restaurantQuery.find().then(function(restaurants){
 				if (restaurants != undefined && restaurants.length > 0) {
 					for (var i = 0; i < restaurants.length; i++) { 
 						var restaurant = restaurants[i];
 						if (_.contains(existingIds, restaurant.id) == false) {
+							console.log("existingIds contains ".concat(restaurant.id).concat("is considered false"));
 							var promotion = {};
 							var lat;
 							var lon;
@@ -72,7 +83,6 @@ exports.listAll = function(req, res) {
 								lon = userLocation["lon"];
 							}
 							var rest = restaurant_assembler.assemble(restaurant, lat, lon);
-							console.log(restaurant);
 							promotion["restaurant"] = rest;
 							promotions.push(promotion);
 							if (promotions.length == 10) {
@@ -81,24 +91,19 @@ exports.listAll = function(req, res) {
 						}
 					}
 				}
-				console.log("before sorting 1");
-				console.log("before sort" + promotions);
+
 				var sortedPromotions = _.sortBy(promotions, function(promotion) {
-					console.log("sorting");
 					if (promotion['restaurant'] != undefined) {
 						var rest = promotion['restaurant'];
 						if (rest.distance != undefined && rest.distance.value != undefined) {
-							console.log("return 1");
 							return 0 - rest.distance.value;
 						} else {
-							console.log("return 0")
 							return 0;
 						}
 					} else {
 						return 0;
 					}
 				}).reverse();
-				console.log("after sort" + promotions);
 				var response = {};
 				response['results'] = sortedPromotions;
 				res.json(200, response);
@@ -108,7 +113,6 @@ exports.listAll = function(req, res) {
 
 		} else {
 			var response = {};
-			console.log("before sorting 2");
 			var sortedPromotions = _.sortBy(promotions, function(promotion) {
 				if (promotion['restaurant'] != undefined) {
 					var rest = promotion['restaurant'];

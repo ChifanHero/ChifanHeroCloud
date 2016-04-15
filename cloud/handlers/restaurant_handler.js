@@ -4,6 +4,8 @@ var Review = Parse.Object.extend('Review');
 var Favorite = Parse.Object.extend('Favorite');
 var Dish = Parse.Object.extend('Dish');
 var Menu = Parse.Object.extend('MenuItem');
+var Restaurant = Parse.Object.extend('Restaurant');
+var _Image = Parse.Object.extend('Image');
 
 Parse.Cloud.beforeSave('Restaurant', function(request, response){
 	var restaurantToSave = request.object;
@@ -18,6 +20,28 @@ Parse.Cloud.beforeSave('Restaurant', function(request, response){
 		}, function(error){
 			console.log(error);
 			response.success();
+		});
+	} else if (restaurantToSave.dirty('image')) {
+		var oldRestaurant = new Restaurant();
+		oldRestaurant.set("objectId", restaurantToSave.id);
+		oldRestaurant.fetch().then(function(oldRestaurant){
+			var image = oldRestaurant.get("image");
+			if (image != undefined) {
+				var imageId = image.id;
+				console.log("image id is ".concat(imageId));
+				var image = new _Image();
+				image.id = imageId;
+				image.destroy().then(function(){ 
+					console.log("successfully deleted old image");
+					response.success();
+				}, function(error){
+					response.reject(error);
+				});
+			} else {
+				response.success();
+			}
+		}, function(error) {
+			response.reject(error);
 		});
 	} else {
 		response.success();

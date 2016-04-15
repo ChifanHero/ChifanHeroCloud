@@ -6,3 +6,4 @@ require('cloud/handlers/list_handler.js');
 require('cloud/handlers/restaurant_handler.js');
 require('cloud/handlers/list_candidate_handler.js');
 require('cloud/handlers/list_member_handler.js');
+require('cloud/handlers/user_handler.js');
