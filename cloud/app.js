@@ -12,7 +12,7 @@ var favorite_manager = require('cloud/delegates/favorite_manager');
 var candidate_manager = require('cloud/delegates/candidate_manager');
 var menu_manager = require('cloud/delegates/menu_manager');
 var image_manager = require('cloud/delegates/image_manager');
-var restaurantCollection_manager = require('cloud/delegates/restaurantCollection_manager');
+var selectedCollection_manager = require('cloud/delegates/selectedCollection_manager');
 
 //Populate req.body
 app.use(express.bodyParser());
@@ -55,8 +55,8 @@ app.get('/dishes/:id', dish_manager.findById);
 app.get('/ratings', rating_manager.findByUserSession);
 app.get('/favorites', favorite_manager.findByUserSession);
 
-app.get('/restaurantCollection/:id', restaurantCollection_manager.findById);
-app.get('/restaurantCollectionMembers/:id', restaurantCollection_manager.findAllRestaurantsMembersById);
+app.get('/selectedCollection/:id', selectedCollection_manager.findById);
+app.get('/restaurantCollectionMembers/:id', selectedCollection_manager.findAllRestaurantsMembersById);
 
 
 
