@@ -15,25 +15,25 @@
 /restaurants/:id/menus  
 /lists/:id  
 /dishes 
-/dishes/:id 
+/dishes/:id  
 /ratings  
 /favorites  
-/selectedCollection/:id 
+/selectedCollection/:id  
 /selectedCollectionWithLatAndLon  
 /restaurantCollectionMembers/:id
 
 #### 2. POST
 /lists  
 /restaurants  
-/promotions 
-/users/signUp 
+/promotions  
+/users/signUp  
 /users/logIn  
-/users/update 
-/users/logOut 
+/users/update  
+/users/logOut  
 /ratings  
 /favorites  
-/lists/candidates 
-/images 
+/lists/candidates  
+/images  
 /restaurantCandidates
 
 #### 3. PUT
