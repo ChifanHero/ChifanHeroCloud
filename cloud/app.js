@@ -56,6 +56,7 @@ app.get('/ratings', rating_manager.findByUserSession);
 app.get('/favorites', favorite_manager.findByUserSession);
 
 app.get('/selectedCollection/:id', selectedCollection_manager.findById);
+app.get('/selectedCollectionWithLatAndLon', selectedCollection_manager.findAllWithCenterAndRadius);
 app.get('/restaurantCollectionMembers/:id', selectedCollection_manager.findAllRestaurantsMembersById);
 
 
