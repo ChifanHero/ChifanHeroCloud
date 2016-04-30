@@ -11,49 +11,29 @@
 
 ### 2. API URI
 #### 1. GET
-/restaurants/:id
-
-/restaurants/:id/menus
-
-/lists/:id
-
-/dishes
-
-/dishes/:id
-
-/ratings
-
-/favorites
-
-/selectedCollection/:id
-
-/selectedCollectionWithLatAndLon
-
+/restaurants/:id  
+/restaurants/:id/menus  
+/lists/:id  
+/dishes 
+/dishes/:id 
+/ratings  
+/favorites  
+/selectedCollection/:id 
+/selectedCollectionWithLatAndLon  
 /restaurantCollectionMembers/:id
 
 #### 2. POST
-/lists
-
-/restaurants
-
-/promotions
-
-/users/signUp
-
-/users/logIn
-
-/users/update
-
-/users/logOut
-
-/ratings
-
-/favorites
-
-/lists/candidates
-
-/images
-
+/lists  
+/restaurants  
+/promotions 
+/users/signUp 
+/users/logIn  
+/users/update 
+/users/logOut 
+/ratings  
+/favorites  
+/lists/candidates 
+/images 
 /restaurantCandidates
 
 #### 3. PUT
