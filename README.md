@@ -14,7 +14,7 @@
 /restaurants/:id  
 /restaurants/:id/menus  
 /lists/:id  
-/dishes 
+/dishes  
 /dishes/:id  
 /ratings  
 /favorites  
