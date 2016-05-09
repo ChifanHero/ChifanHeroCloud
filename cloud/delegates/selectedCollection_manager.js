@@ -33,6 +33,7 @@ exports.findAllWithCenterAndRadius = function(req, res){
 	var query = new Parse.Query(SelectedCollection);
 	var userGeoPoint = new Parse.GeoPoint(parseFloat(userLocation.lat), parseFloat(userLocation.lon));
 	query.withinMiles("coverage_center_geo", userGeoPoint, COVERAGE_RADIUS);
+	query.include("cell_image");
 
 	query.find().then(function(_selectedCollections) {
 		var results = [];

@@ -14,8 +14,8 @@ Parse.Cloud.beforeSave('Favorite', function(request, response){
 		query.equalTo('dish', favoriteToSave.get('dish'));
 	} else if (type === 'restaurant') {
 		query.equalTo('restaurant', favoriteToSave.get('restaurant'));
-	} else if (type === 'list') {
-		query.equalTo('list', favoriteToSave.get('list'));
+	} else if (type === 'selected_collection') {
+		query.equalTo('selected_collection', favoriteToSave.get('selected_collection'));
 	}
 	query.count().then(function(count){
 		if (count > 0) {
@@ -58,16 +58,16 @@ Parse.Cloud.afterSave('Favorite', function(request){
 				_restaurant.save();
 			});
 		}
-	} else if (type === 'list') {
-		var list = favoriteSaved.get('list');
-		if (list != undefined) {
-			list.fetch().then(function(_list){
-				if(_list.get('favorite_count') == undefined){
-					_list.set('favorite_count', 1);
+	} else if (type === 'selected_collection') {
+		var selectedCollection = favoriteSaved.get('selected_collection');
+		if (selectedCollection != undefined) {
+			selectedCollection.fetch().then(function(_selectedCollection){
+				if(_selectedCollection.get('user_favorite_count') == undefined){
+					_selectedCollection.set('user_favorite_count', 1);
 				} else{
-					_list.increment('favorite_count', 1);
+					_selectedCollection.increment('user_favorite_count', 1);
 				}
-				_list.save();
+				_selectedCollection.save();
 			})
 		}
 	}
@@ -95,12 +95,12 @@ Parse.Cloud.afterDelete('Favorite', function(request){
 				restaurant.save();
 			});
 		}
-	} else if (type === 'list') {
-		var list = favoriteDeleted.get('list');
-		if (list != undefined) {
-			list.fetch().then(function(list){
-				list.increment('favorite_count', -1);
-				list.save();
+	} else if (type === 'selected_collection') {
+		var selectedCollection = favoriteDeleted.get('selected_collection');
+		if (selectedCollection != undefined) {
+			selectedCollection.fetch().then(function(_selectedCollection){
+				_selectedCollection.increment('user_favorite_count', -1);
+				_selectedCollection.save();
 			})
 		}
 	}

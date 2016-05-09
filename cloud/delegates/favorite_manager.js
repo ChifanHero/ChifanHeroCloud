@@ -5,7 +5,7 @@ var error_handler = require('cloud/error_handler');
 var Favorite = Parse.Object.extend('Favorite');
 var Restaurant = Parse.Object.extend('Restaurant');
 var Dish = Parse.Object.extend('Dish');
-var List = Parse.Object.extend('List');
+var SelectedCollection = Parse.Object.extend('SelectedCollection');
 
 
 exports.addByUserSession = function(req, res){
@@ -14,17 +14,13 @@ exports.addByUserSession = function(req, res){
 	var objectId = req.body['object_id'];
 
 	if (user == undefined) {
-		var error = {};
-		error['message'] = 'User not found';
-		res.json(404, error);
-		return;
+		var error = new Parse.Error(Parse.Error.INVALID_SESSION_TOKEN, "Invalid session token");
+		error_handler.handle(error, {}, res);
 	}
 
 	if (!validateParameters(type)) {
-		var error = {};
-		error['message'] = 'The parameter \'type\' has invalid value';
-		res.json(400, error);
-		return;
+		var error = new Parse.Error(Parse.Error.INVALID_QUERY, "The parameter \'type\' has invalid value");
+		error_handler.handle(error, {}, res);
 	}
 
 	var favorite = new Favorite();
@@ -40,12 +36,12 @@ exports.addByUserSession = function(req, res){
 		favorite.set('type', type);
 		favorite.set('user', user);
 		favorite.set('restaurant', restaurant);
-	} else if (type === 'list') {
-		var list = new List();
-		list.id = objectId;
+	} else if (type === 'selected_collection') {
+		var selectedCollection = new SelectedCollection();
+		selectedCollection.id = objectId;
 		favorite.set('type', type);
 		favorite.set('user', user);
-		favorite.set('list', list);
+		favorite.set('selected_collection', selectedCollection);
 	}
 	favorite.save().then(function(result){
 		var favoriteRes = favorite_assembler.assemble(result);
@@ -62,17 +58,13 @@ exports.findByUserSession = function(req, res){
 	var type = req.query['type'];
 	var user = req.user;
 	if (user == undefined) {
-		var error = {};
-		error['message'] = 'User not found';
-		res.json(404, error);
-		return;
-	} 
+		var error = new Parse.Error(Parse.Error.INVALID_SESSION_TOKEN, "Invalid session token");
+		error_handler.handle(error, {}, res);
+	}
 
 	if (!validateParameters(type)) {
-		var error = {};
-		error['message'] = 'The parameter \'type\' has invalid value';
-		res.json(400, error);
-		return;
+		var error = new Parse.Error(Parse.Error.INVALID_QUERY, "The parameter \'type\' has invalid value");
+		error_handler.handle(error, {}, res);
 	}
 
 	var query = new Parse.Query(Favorite);
@@ -84,19 +76,19 @@ exports.findByUserSession = function(req, res){
 	query.include('dish.image');
 	query.include('restaurant');
 	query.include('restaurant.image');
-	query.include('list');
-	query.include('list.image');
+	query.include('selected_collection');
+	query.include('selected_collection.cell_image');
 
 	query.find().then(function(results) {
-		var reviews = [];
+		var favorites = [];
 		if (results != undefined && results.length > 0) {
 			_.each(results, function(result) {
-				var rev = favorite_assembler.assemble(result);
-				reviews.push(rev);
+				var favorite = favorite_assembler.assemble(result);
+				favorites.push(favorite);
 			});
 		}
 		var response = {};
-		response['results'] = reviews;
+		response['results'] = favorites;
 		res.json(200, response);
 	}, function(error) {
 		error_handler.handle(error, {}, res);
@@ -118,10 +110,10 @@ exports.deleteByUserSession = function(req, res){
 		var restaurant = new Restaurant();
 		restaurant.id = objectId;
 		query.equalTo('restaurant', restaurant);
-	} else if (type === 'list') {
-		var list = new List();
-		list.id = objectId;
-		query.equalTo('list', list);
+	} else if (type === 'selected_collection') {
+		var selectedCollection = new SelectedCollection();
+		selectedCollection.id = objectId;
+		query.equalTo('selected_collection', selectedCollection);
 	}
 	query.find().then(function(results){
 		return Parse.Object.destroyAll(results);
@@ -135,7 +127,7 @@ exports.deleteByUserSession = function(req, res){
 
 
 function validateParameters(type) {
-	if (type !== 'dish' && type !== 'restaurant' && type !== 'list') {
+	if (type !== 'dish' && type !== 'restaurant' && type !== 'selected_collection') {
 		return false;
 	}
 	return true;
