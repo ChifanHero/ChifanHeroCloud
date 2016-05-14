@@ -13,6 +13,7 @@ var candidate_manager = require('cloud/delegates/candidate_manager');
 var menu_manager = require('cloud/delegates/menu_manager');
 var image_manager = require('cloud/delegates/image_manager');
 var selectedCollection_manager = require('cloud/delegates/selectedCollection_manager');
+var city_manager = require('cloud/delegates/city_manager');
 
 //Populate req.body
 app.use(express.bodyParser());
@@ -59,7 +60,7 @@ app.get('/selectedCollections/:id', selectedCollection_manager.findById);
 app.get('/selectedCollections', selectedCollection_manager.findAllWithCenterAndRadius);
 app.get('/restaurantCollectionMembers/:id', selectedCollection_manager.findAllRestaurantsMembersById);
 
-
+app.get('/cities', city_manager.findCitiesWithPrefix);
 
 //POST
 app.post('/lists', list_manager.listAll);
