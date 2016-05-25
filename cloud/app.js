@@ -77,7 +77,8 @@ app.post('/images', image_manager.upload);
 app.post('/restaurantCandidates', restaurant_manager.vote);
 
 //PUT
-app.put('/restaurants/:id', restaurant_manager.update); 
+app.put('/restaurants/:id', restaurant_manager.update);
+app.put('/restaurantCollectionMemCan', selectedCollection_manager.nominateRestaurant);
 
 //DELETE
 app.delete('/favorites', favorite_manager.deleteByUserSession); 

@@ -1,5 +1,6 @@
 var SelectedCollection = Parse.Object.extend('SelectedCollection');
 var RestaurantCollectionMember = Parse.Object.extend('RestaurantCollectionMember');
+var RestaurantCollectionMemCan = Parse.Object.extend('RestaurantCollectionMemCan');
 
 var selectedCollection_assembler = require('cloud/assemblers/selectedCollection');
 var restaurant_assembler = require('cloud/assemblers/restaurant');
@@ -70,6 +71,57 @@ exports.findAllRestaurantsMembersById = function(req, res){
 		var response = {};
 		response['results'] = restaurants;
 		res.json(200, response);
+	}, function(error){
+		error_handler.handle(error, {}, res);
+	});
+}
+
+exports.nominateRestaurant = function(req, res){
+	var collectionId = req.body["collection_id"];
+	var restaurantId = req.body["restaurant_id"];
+
+	var restaurant = {
+	        __type: "Pointer",
+	        className: "Restaurant",
+	        objectId: restaurantId
+	    };
+	var selectedCollection = {
+	        __type: "Pointer",
+	        className: "SelectedCollection",
+	        objectId: collectionId
+	    };
+	
+	var query = new Parse.Query(RestaurantCollectionMemCan);
+	query.equalTo("selected_collection", selectedCollection);
+	query.equalTo("restaurant", restaurant);
+	query.find().then(function(memCanList){
+		if(memCanList.length > 0) {
+			var memCan = memCanList[0];
+			memCan.increment("count", 1);
+			memCan.save().then(function(_memCan) {
+				var response = {};
+				var memCanRes = {};
+				memCanRes["count"] = _memCan.get("count");
+				response["result"] = memCanRes;
+				res.json(200, response);
+			}, function(error) {
+				error_handler.handle(error, {}, res);
+			});
+		} else {
+			var memCan = new RestaurantCollectionMemCan();
+			memCan.set("selected_collection", selectedCollection);
+			memCan.set("restaurant", restaurant);
+			memCan.set("count", 1);
+			memCan.save().then(function(_memCan) {
+				var response = {};
+				var memCanRes = {};
+				memCanRes["count"] = _memCan.get("count");
+				response["result"] = memCanRes;
+				res.json(200, response);
+			}, function(error) {
+				error_handler.handle(error, {}, res);
+			});
+		}
 	}, function(error){
 		error_handler.handle(error, {}, res);
 	});
