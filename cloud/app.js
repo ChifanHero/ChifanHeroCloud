@@ -61,6 +61,7 @@ app.get('/selectedCollections', selectedCollection_manager.findAllWithCenterAndR
 app.get('/restaurantCollectionMembers/:id', selectedCollection_manager.findAllRestaurantsMembersById);
 
 app.get('/cities', city_manager.findCitiesWithPrefix);
+app.get('/hotCities', city_manager.getHotCities);
 
 //POST
 app.post('/lists', list_manager.listAll);

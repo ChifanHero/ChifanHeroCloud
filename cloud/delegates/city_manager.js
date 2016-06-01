@@ -24,3 +24,25 @@ exports.findCitiesWithPrefix = function(req, res){
 		error_handler.handle(error, {}, res);
 	});
 };
+
+exports.getHotCities = function(req, res){
+	var query = new Parse.Query(City);
+	query.limit(5);
+	query.equalTo("activated", true);
+	query.descending("member_count");
+	query.find().then(function(results) {
+		console.log(results.length);
+		var cities = [];
+		if (results != undefined && results.length > 0) {
+			_.each(results, function(result){
+				var city = city_assembler.assemble(result);
+				cities.push(city);
+			});
+		}
+		var response = {};
+		response['results'] = cities;
+		res.json(200, response);
+	}, function(error) {
+		error_handler.handle(error, {}, res);
+	});
+};
