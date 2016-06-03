@@ -9,6 +9,7 @@ exports.assemble = function(source) {
 		selectedCollection['type_id'] = source.get('type_id');
 		selectedCollection['member_count'] = source.get('member_count');
 		selectedCollection['user_favorite_count'] = source.get('user_favorite_count');
+		selectedCollection['like_count'] = source.get('like_count');
 		selectedCollection['cell_image'] = image_assembler.assemble(source.get('cell_image'));
 		selectedCollection['coverage_radius'] = source.get('coverage_radius');
 		var coverageCenterGeo = source.get('coverage_center_geo');

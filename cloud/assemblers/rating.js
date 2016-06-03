@@ -1,6 +1,6 @@
 var restaurant_assembler = require('cloud/assemblers/restaurant');
 var dish_assembler = require('cloud/assemblers/dish');
-var list_assembler = require('cloud/assemblers/list');
+var selectedCollection_assembler = require('cloud/assemblers/selectedCollection');
 
 exports.assemble = function(source){
 	var rating = {};
@@ -21,9 +21,9 @@ exports.assemble = function(source){
 			var restaurant = restaurant_assembler.assemble(source.get('restaurant'));
 			rating['restaurant'] = restaurant;
 		}
-		if (source.get('list') != undefined) {
-			var list = list_assembler.assemble(source.get('list'));
-			rating['list'] = list;
+		if (source.get('selected_collection') != undefined) {
+			var selectedCollection = selectedCollection_assembler.assemble(source.get('selected_collection'));
+			rating['selected_collection'] = selectedCollection;
 		}
 	}
 	return rating;

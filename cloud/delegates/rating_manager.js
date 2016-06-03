@@ -2,7 +2,7 @@ var _ = require('underscore');
 var Rating = Parse.Object.extend('Rating');
 var Restaurant = Parse.Object.extend('Restaurant');
 var Dish = Parse.Object.extend('Dish');
-var List = Parse.Object.extend('List');
+var List = Parse.Object.extend('SelectedCollection');
 var restaurant_assembler = require('cloud/assemblers/restaurant');
 var rating_assembler = require('cloud/assemblers/rating');
 var error_handler = require('cloud/error_handler');
@@ -36,16 +36,16 @@ exports.rateByUserSession = function(req, res){
 		rating.set('action', action);
 		rating.set('user', user);
 		rating.set('restaurant', restaurant);
-	} else if (type === 'list') {
-		var list = {
+	} else if (type === 'selected_collection') {
+		var selected_collection = {
 	        __type: "Pointer",
-	        className: "List",
+	        className: "SelectedCollection",
 	        objectId: objectId
 	    };
 		rating.set('type', type);
 		rating.set('action', action);
 		rating.set('user', user);
-		rating.set('list', list);
+		rating.set('selected_collection', selected_collection);
 	}
 	rating.save().then(function(_rating){
 		var ratingRes = rating_assembler.assemble(_rating);
@@ -58,15 +58,14 @@ exports.rateByUserSession = function(req, res){
 }
 
 function validateParameters(type, action, res) {
-	if (type !== 'dish' && type !== 'restaurant' && type !== 'list') {
-		var error = {};
-		error['message'] = 'The parameter \'type\' is invalid';
-		res.json(400, error);
+	if (type !== 'dish' && type !== 'restaurant' && type !== 'selected_collection') {
+		var error = new Parse.Error(Parse.Error.INVALID_QUERY, "The parameter \'type\' is invalid");
+		error_handler.handle(error, {}, res);
 		return false;
 	}
 	if (action !== 'like' && action != 'dislike' && action != 'neutral') {
-		error['message'] = 'The parameter \'action\' is invalid';
-		res.json(400, error);
+		var error = new Parse.Error(Parse.Error.INVALID_QUERY, "The parameter \'action\' is invalid");
+		error_handler.handle(error, {}, res);
 		return false;
 	}
 	return true;
@@ -77,9 +76,8 @@ exports.findByUserSession = function(req, res) {
 	var type = req.query['type'];
 	var user = req.user;
 	if (user == undefined) {
-		var error = {};
-		error['message'] = 'Not able to recoginize the user';
-		res.json(401, error);
+		var error = new Parse.Error(Parse.Error.SESSION_MISSING, "Not able to recoginize the user");
+		error_handler.handle(error, {}, res);
 	} else {
 		if (!validateParameters(type, action, res)) {
 			return;
@@ -90,7 +88,7 @@ exports.findByUserSession = function(req, res) {
 		query.include('dish.from_restaurant');
 		query.include('dish.picture');
 		query.include('restaurant.picture');
-		query.include('list');
+		query.include('selected_collection');
 		query.equalTo('type', type);
 		query.find().then(function(results) {
 			if (results != undefined && results.length > 0) {

@@ -10,8 +10,8 @@ Parse.Cloud.afterSave('Rating', function(request){
 		object = ratingSaved.get('dish');
 	} else if (type === 'restaurant') {
 		object = ratingSaved.get('restaurant');
-	} else if (type === 'list') {
-		object = ratingSaved.get('list');
+	} else if (type === 'selected_collection') {
+		object = ratingSaved.get('selected_collection');
 	}
 	object.fetch().then(function(_object){
 		if (action === 'like') {
@@ -46,8 +46,8 @@ Parse.Cloud.afterDelete('Rating', function(request){
 		object = ratingDeleted.get('dish');
 	} else if (type === 'restaurant') {
 		object = ratingDeleted.get('restaurant');
-	} else if (type === 'list') {
-		object = ratingDeleted.get('list');
+	} else if (type === 'selected_collection') {
+		object = ratingDeleted.get('selected_collection');
 	}
 	object.fetch().then(function(object){
 		if (action === 'like') {
