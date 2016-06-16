@@ -2,7 +2,7 @@ var restaurant_assembler = require('cloud/assemblers/restaurant');
 var dish_assembler = require('cloud/assemblers/dish');
 var selectedCollection_assembler = require('cloud/assemblers/selectedCollection');
 
-exports.assemble = function(source){
+exports.assemble = function(source, lat, lon){
 	var favorite = {};
 	if (source != undefined) {
 		favorite['id'] = source.id;
@@ -17,7 +17,7 @@ exports.assemble = function(source){
 			favorite['dish'] = dish;
 		}
 		if (source.get('restaurant') != undefined) {
-			var restaurant = restaurant_assembler.assemble(source.get('restaurant'));
+			var restaurant = restaurant_assembler.assemble(source.get('restaurant'), lat, lon);
 			favorite['restaurant'] = restaurant;
 		}
 		if (source.get('selected_collection') != undefined) {

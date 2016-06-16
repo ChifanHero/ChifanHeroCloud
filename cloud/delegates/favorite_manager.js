@@ -56,6 +56,10 @@ exports.addByUserSession = function(req, res){
 
 exports.findByUserSession = function(req, res){
 	var type = req.query['type'];
+	var lat = parseFloat(req.query['lat']);
+	var lon = parseFloat(req.query['lon']);
+	console.log(lat);
+	console.log(lon);
 	var user = req.user;
 	if (user == undefined) {
 		var error = new Parse.Error(Parse.Error.INVALID_SESSION_TOKEN, "Invalid session token");
@@ -83,7 +87,7 @@ exports.findByUserSession = function(req, res){
 		var favorites = [];
 		if (results != undefined && results.length > 0) {
 			_.each(results, function(result) {
-				var favorite = favorite_assembler.assemble(result);
+				var favorite = favorite_assembler.assemble(result, lat, lon);
 				favorites.push(favorite);
 			});
 		}
