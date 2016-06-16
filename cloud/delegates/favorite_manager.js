@@ -124,6 +124,54 @@ exports.deleteByUserSession = function(req, res){
 	});
 }
 
+exports.checkIsUserFavorite = function(req, res){
+	var user = req.user
+	var type = req.query['type']
+	var objectId = req.query['id']
+	if (user == undefined) {
+		var error = new Parse.Error(Parse.Error.INVALID_SESSION_TOKEN, "Invalid session token");
+		error_handler.handle(error, {}, res);
+	}
+
+	if (!validateParameters(type)) {
+		var error = new Parse.Error(Parse.Error.INVALID_QUERY, "The parameter \'type\' has invalid value");
+		error_handler.handle(error, {}, res);
+	}
+
+	var query = new Parse.Query(Favorite);
+	query.equalTo('user', user);
+	query.equalTo('type', type);
+	if (type == "restaurant"){
+		var restaurant = {
+	        __type: "Pointer",
+	        className: "Restaurant",
+	        objectId: objectId
+	    };
+		query.equalTo('restaurant', restaurant);
+	} else if (type == "selected_collection"){
+		var selected_collection = {
+	        __type: "Pointer",
+	        className: "SelectedCollection",
+	        objectId: objectId
+	    };
+		query.equalTo('selected_collection', selected_collection);
+	}
+
+	query.find().then(function(results) {
+		if (results != undefined && results.length > 0) {
+			var response = {};
+			response['result'] = true;
+			res.json(200, response);
+			return;
+		}
+		var response = {};
+		response['result'] = false;
+		res.json(200, response);
+	}, function(error) {
+		error_handler.handle(error, {}, res);
+	});
+}
+
 
 
 function validateParameters(type) {

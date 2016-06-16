@@ -55,6 +55,7 @@ app.get('/dishes/:id', dish_manager.findById);
 
 app.get('/ratings', rating_manager.findByUserSession);
 app.get('/favorites', favorite_manager.findByUserSession);
+app.get('/isFavorite', favorite_manager.checkIsUserFavorite);
 
 app.get('/selectedCollections/:id', selectedCollection_manager.findById);
 app.get('/selectedCollections', selectedCollection_manager.findAllWithCenterAndRadius);
