@@ -4,8 +4,6 @@ Parse.Cloud.beforeSave(Parse.User, function(request, response) {
 	var userToSave = request.object;
 	if (userToSave.dirty('picture')) {
 		var oldUser = new Parse.Query(Parse.User);
-		// oldUser.id = userToSave.id;
-		// oldUser.set("objectId", userToSave.id);
 		oldUser.equalTo("objectId", userToSave.id);
 		oldUser.find().then(function(oldUsers){
 			if (oldUsers != undefined && oldUsers.length > 0) {

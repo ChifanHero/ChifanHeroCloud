@@ -1,6 +1,83 @@
 var user_assembler = require('cloud/assemblers/user');
 var image_assembler = require('cloud/assemblers/image');
 var error_handler = require('cloud/error_handler');
+var crypto = require('crypto');
+
+var TokenStorage = Parse.Object.extend('TokenStorage');
+
+exports.oauthLogIn = function(req, res){
+	var oauthLogin = req.body["oauth_login"];
+
+	var query = new Parse.Query(TokenStorage);
+	query.equalTo('oauth_login', oauthLogin);
+
+	query.find().then(function(_tokenStorage) {
+		if(_tokenStorage.length == 0){
+			var username = oauthLogin + "#ChifanHero";
+			//password need to be encoded in the future
+			var password = randomValueBase64(12);
+			var user = new Parse.User();
+			user.set('username', username);
+			user.set('password', password);
+
+			user.signUp().then(function(_user){
+				var tokenStorage = new TokenStorage();
+				tokenStorage.set("oauth_login", oauthLogin);
+				tokenStorage.set("username", username);
+				tokenStorage.set("password", password);
+				tokenStorage.set("session_token", _user.getSessionToken());
+				tokenStorage.save();
+
+				var response = {};
+				response['success'] = true;
+				response['session_token'] = _user.getSessionToken();
+
+				var userRes = user_assembler.assemble(_user);
+				response['user'] = userRes;
+				res.json(200, response);
+			}, function(error){
+				error_handler.handle(error, {}, res);
+			});
+			return;
+		} else if(_tokenStorage.length == 1){
+			var username = _tokenStorage[0].get("username");
+			var password = _tokenStorage[0].get("password");
+			var sessionToken = _tokenStorage[0].get("session_token");
+			Parse.User.become(sessionToken).then(function(_user){
+				var response = {};
+				response['success'] = true;
+				response['session_token'] = _user.getSessionToken();
+
+				var userRes = user_assembler.assemble(_user);
+				response['user'] = userRes;
+				res.json(200, response);
+			}, function(error){
+				if(error["code"] == Parse.Error.INVALID_SESSION_TOKEN){
+					Parse.User.logIn(username, password).then(function(_user){
+						_tokenStorage[0].set("session_token", _user.getSessionToken());
+						_tokenStorage[0].save();
+						var response = {};
+						response['success'] = true;
+						response['session_token'] = _user.getSessionToken();
+						var user = user_assembler.assemble(_user);
+						response['user'] = user;
+						res.json(200, response);
+					}, function(error){
+						error_handler.handle(error, {}, res);
+					});
+				} else{
+					error_handler.handle(error, {}, res);
+				}
+			});
+			return;
+		} else{
+			var error = new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR, "User with same oauth_login saved multiple times. Please upgrade this issue.");
+			error_handler.handle(error, {}, res);
+		}
+	}, function(error) {
+		error_handler.handle(error, {}, res);
+	});
+}
 
 exports.logIn = function(req, res){
 
@@ -149,5 +226,13 @@ exports.logOut = function(req, res){
 	}, function(error){
 		error_handler.handle(error, {}, res);
 	});	
+}
+
+function randomValueBase64 (len) {
+    return crypto.randomBytes(Math.ceil(len * 3 / 4))
+        .toString('base64')   // convert to base64 format
+        .slice(0, len)        // return required number of characters
+        .replace(/\+/g, '0')  // replace '+' with '0'
+        .replace(/\//g, '0'); // replace '/' with '0'
 }
 

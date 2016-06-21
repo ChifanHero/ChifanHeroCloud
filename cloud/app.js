@@ -68,15 +68,17 @@ app.get('/hotCities', city_manager.getHotCities);
 app.post('/lists', list_manager.listAll);
 app.post('/restaurants', restaurant_manager.listAll);
 app.post('/promotions', promotion_manager.listAll);
-app.post('/users/signUp', user_manager.signUp);
-app.post('/users/logIn', user_manager.logIn);
-app.post('/users/update', user_manager.update);
-app.post('/users/logOut', user_manager.logOut);
 app.post('/ratings', rating_manager.rateByUserSession);
 app.post('/favorites', favorite_manager.addByUserSession);
 app.post('/lists/candidates', candidate_manager.nominate);
 app.post('/images', image_manager.upload);
 app.post('/restaurantCandidates', restaurant_manager.vote);
+
+app.post('/users/oauthLogin', user_manager.oauthLogIn);
+app.post('/users/signUp', user_manager.signUp);
+app.post('/users/logIn', user_manager.logIn);
+app.post('/users/update', user_manager.update);
+app.post('/users/logOut', user_manager.logOut);
 
 //PUT
 app.put('/restaurants/:id', restaurant_manager.update);
