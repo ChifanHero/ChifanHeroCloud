@@ -1,82 +1,112 @@
 var user_assembler = require('cloud/assemblers/user');
 var image_assembler = require('cloud/assemblers/image');
 var error_handler = require('cloud/error_handler');
-var crypto = require('crypto');
+var Buffer = require('buffer').Buffer;
+var _ = require('underscore');
 
 var TokenStorage = Parse.Object.extend('TokenStorage');
 
+var restrictedAcl = new Parse.ACL();
+restrictedAcl.setPublicReadAccess(false);
+restrictedAcl.setPublicWriteAccess(false);
+
 exports.oauthLogIn = function(req, res){
 	var oauthLogin = req.body["oauth_login"];
+	var accessToken = req.body["access_token"];
 
-	var query = new Parse.Query(TokenStorage);
-	query.equalTo('oauth_login', oauthLogin);
-
-	query.find().then(function(_tokenStorage) {
-		if(_tokenStorage.length == 0){
-			var username = oauthLogin + "#ChifanHero";
-			//password need to be encoded in the future
-			var password = randomValueBase64(12);
-			var user = new Parse.User();
-			user.set('username', username);
-			user.set('password', password);
-
-			user.signUp().then(function(_user){
-				var tokenStorage = new TokenStorage();
-				tokenStorage.set("oauth_login", oauthLogin);
-				tokenStorage.set("username", username);
-				tokenStorage.set("password", password);
-				tokenStorage.set("session_token", _user.getSessionToken());
-				tokenStorage.save();
-
-				var response = {};
-				response['success'] = true;
-				response['session_token'] = _user.getSessionToken();
-
-				var userRes = user_assembler.assemble(_user);
-				response['user'] = userRes;
-				res.json(200, response);
-			}, function(error){
-				error_handler.handle(error, {}, res);
-			});
-			return;
-		} else if(_tokenStorage.length == 1){
-			var username = _tokenStorage[0].get("username");
-			var password = _tokenStorage[0].get("password");
-			var sessionToken = _tokenStorage[0].get("session_token");
-			Parse.User.become(sessionToken).then(function(_user){
-				var response = {};
-				response['success'] = true;
-				response['session_token'] = _user.getSessionToken();
-
-				var userRes = user_assembler.assemble(_user);
-				response['user'] = userRes;
-				res.json(200, response);
-			}, function(error){
-				if(error["code"] == Parse.Error.INVALID_SESSION_TOKEN){
-					Parse.User.logIn(username, password).then(function(_user){
-						_tokenStorage[0].set("session_token", _user.getSessionToken());
-						_tokenStorage[0].save();
-						var response = {};
-						response['success'] = true;
-						response['session_token'] = _user.getSessionToken();
-						var user = user_assembler.assemble(_user);
-						response['user'] = user;
-						res.json(200, response);
-					}, function(error){
-						error_handler.handle(error, {}, res);
-					});
-				} else{
-					error_handler.handle(error, {}, res);
-				}
-			});
-			return;
-		} else{
-			var error = new Parse.Error(Parse.Error.INTERNAL_SERVER_ERROR, "User with same oauth_login saved multiple times. Please upgrade this issue.");
-			error_handler.handle(error, {}, res);
+	Parse.Cloud.useMasterKey();
+	Parse.Promise.as().then(function() {
+		if (oauthLogin != undefined) {
+		 	return upsertOauthUser(accessToken, oauthLogin);
+		} else {
+		  	return Parse.Promise.error("Oauth Login is required");
 		}
-	}, function(error) {
-		error_handler.handle(error, {}, res);
+	}).then(function(user) {
+		var response = {};
+		response['success'] = true;
+		response['session_token'] = user.getSessionToken();
+
+		var userRes = user_assembler.assemble(user);
+		response['user'] = userRes;
+		res.json(200, response);
 	});
+}
+
+/**
+ *   This function checks to see if this user has logged in before.
+ *   If the user is found, update the access_token (if necessary) and return
+ *   the users session token.  If not found, return the newOauthUser promise.
+ */
+var upsertOauthUser = function(accessToken, oauthLogin) {
+ 	var query = new Parse.Query(TokenStorage);
+ 	query.equalTo('oauth_login', oauthLogin);
+ 	query.ascending('createdAt');
+  	var password;
+  	// Check if this oauthLogin has previously logged in, using the master key
+  	return query.first({ useMasterKey: true }).then(function(tokenData) {
+    	// If not, create a new user.
+    	if (!tokenData) {
+      		return newOauthUser(accessToken, oauthLogin);
+    	}
+    	// If found, fetch the user.
+    	var user = tokenData.get('user');
+   		return user.fetch({ useMasterKey: true }).then(function(user) {
+	      	// Update the accessToken if it is different.
+	      	if (accessToken !== tokenData.get('access_token')) {
+	        	tokenData.set('access_token', accessToken);
+	      	}
+	      /**
+	       * This save will not use an API request if the token was not changed.
+	       * e.g. when a new user is created and upsert is called again.
+	       */
+	      	return tokenData.save(null, { useMasterKey: true });
+    	}).then(function(obj) {
+			password = new Buffer(24);
+			_.times(24, function(i) {
+				password.set(i, _.random(0, 255));
+			});
+			password = password.toString('base64')
+			user.setPassword(password);
+			return user.save();
+    	}).then(function(user) {
+			return Parse.User.logIn(user.get('username'), password);
+    	}).then(function(user) {
+     		// Return the user object.
+      		return Parse.Promise.as(user);
+    	});
+  	});
+}
+
+/**
+ *   This function creates a Parse User, and
+ *   associates it with an object in the TokenStorage class.
+ *   Once completed, this will return upsertOauthUser.  This is done to protect
+ *   against a race condition:  In the rare event where 2 new users are created
+ *   at the same time, only the first one will actually get used.
+ */
+var newOauthUser = function(accessToken, oauthLogin) {
+  	var user = new Parse.User();
+  	// Generate a random username and password.
+  	var username = oauthLogin + "#ChifanHero";
+  	var password = new Buffer(24);
+  	_.times(24, function(i) {
+    	password.set(i, _.random(0, 255));
+  	});
+  	user.set("username", username);
+  	user.set("password", password.toString('base64'));
+  	// Sign up the new User
+  	return user.signUp().then(function(user) {
+    	// create a new TokenStorage object to store the user+GitHub association.
+    	var ts = new TokenStorage();
+	    ts.set('oauth_login', oauthLogin);
+	    ts.set('access_token', accessToken);
+	    ts.set('user', user);
+	    ts.setACL(restrictedAcl);
+	    // Use the master key because TokenStorage objects should be protected.
+    	return ts.save(null, { useMasterKey: true });
+  	}).then(function(tokenStorage) {
+    	return upsertOauthUser(accessToken, oauthLogin);
+  	});
 }
 
 exports.logIn = function(req, res){
@@ -226,13 +256,5 @@ exports.logOut = function(req, res){
 	}, function(error){
 		error_handler.handle(error, {}, res);
 	});	
-}
-
-function randomValueBase64 (len) {
-    return crypto.randomBytes(Math.ceil(len * 3 / 4))
-        .toString('base64')   // convert to base64 format
-        .slice(0, len)        // return required number of characters
-        .replace(/\+/g, '0')  // replace '+' with '0'
-        .replace(/\//g, '0'); // replace '/' with '0'
 }
 
