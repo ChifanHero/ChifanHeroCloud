@@ -258,3 +258,15 @@ exports.logOut = function(req, res){
 	});	
 }
 
+exports.resetPassword = function(req, res){
+	Parse.User.requestPasswordReset("email@example.com", {
+  success: function() {
+  // Password reset request was sent successfully
+  },
+  error: function(error) {
+    // Show the error message somewhere
+    alert("Error: " + error.code + " " + error.message);
+  }
+});
+}
+

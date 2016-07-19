@@ -1,13 +1,15 @@
 exports.assemble = function(source){
-	var picture = {};
+	var image = {};
 	if (source != undefined) {
-		picture['id'] = source.id;
+		image['id'] = source.id;
 		if (source.get('thumbnail') != undefined) {
-			picture['thumbnail'] = source.get('thumbnail').url();
+			image['thumbnail'] = source.get('thumbnail').url();
 		}
 		if (source.get('original') != undefined) {
-			picture['original'] = source.get('original').url();
+			image['original'] = source.get('original').url();
 		}
+		image['type'] = source.get('type');
+		image['restaurant'] = source.get('restaurant');
 	}
-	return picture;
+	return image;
 }

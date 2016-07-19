@@ -2,7 +2,6 @@ var Restaurant = Parse.Object.extend('Restaurant');
 var RestaurantCandidate = Parse.Object.extend('RestaurantCandidate');
 var Dish = Parse.Object.extend('Dish');
 var _ = require('underscore');
-var Coupon = Parse.Object.extend('Coupon');
 var restaurant_assembler = require('cloud/assemblers/restaurant');
 var dish_assembler = require('cloud/assemblers/dish');
 var error_handler = require('cloud/error_handler');
@@ -73,8 +72,7 @@ exports.findById = function(req, res) {
 	var promises = [];
 	promises.push(findRestaurantById(id));
 	promises.push(findHotDishesByRestaurantId(id));
-	promises.push(findCouponByRestaurantId(id));
-	Parse.Promise.when(promises).then(function(_restaurant, _dishes, _coupons){
+	Parse.Promise.when(promises).then(function(_restaurant, _dishes){
 		var restaurant = restaurant_assembler.assemble(_restaurant);
 		var dishes = [];
 		if (_dishes != undefined && _dishes.length > 0) {
@@ -96,43 +94,16 @@ exports.findById = function(req, res) {
 					}
 				}
 				restaurant['votes'] = votes;
-				var coupons = [];
-				if (_coupons != undefined && _coupons.length > 0) {
-					_.each(_coupons, function(_coupon){
-						var coupon = {};
-						coupon['id'] = _coupon.id;
-						coupons.push(coupon);
-					});
-				}
-				restaurant['coupons'] = coupons;
 				var response = {};
 				response['result'] = restaurant;
 				res.json(200, response);
 			}, function(error){
-				var coupons = [];
-				if (_coupons != undefined && _coupons.length > 0) {
-					_.each(_coupons, function(_coupon){
-						var coupon = {};
-						coupon['id'] = _coupon.id;
-						coupons.push(coupon);
-					});
-				}
 				restaurant['votes'] = 0;
-				restaurant['coupons'] = coupons;
 				var response = {};
 				response['result'] = restaurant;
 				res.json(200, response);
 			});
 		} else {
-			var coupons = [];
-			if (_coupons != undefined && _coupons.length > 0) {
-				_.each(_coupons, function(_coupon){
-					var coupon = {};
-					coupon['id'] = _coupon.id;
-					coupons.push(coupon);
-				});
-			}
-			restaurant['coupons'] = coupons;
 			var response = {};
 			response['result'] = restaurant;
 			res.json(200, response);
@@ -248,14 +219,6 @@ function findHotDishesByRestaurantId(id) {
 	return query.find();
 }
 
-function findCouponByRestaurantId(id) {
-	var rest = new Restaurant();
-	rest.id = id;
-	var query = new Parse.Query(Coupon);
-	query.equalTo('active', true);
-	return query.find();
-}
-
 exports.update = function(req, res) {
 	var id = req.params.id;
 	var restaurant = new Restaurant();
@@ -290,5 +253,4 @@ exports.update = function(req, res) {
 	}, function(error) {
 		error_handler.handle(error, {}, res);
 	});
- 
 }

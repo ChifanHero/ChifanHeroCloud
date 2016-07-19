@@ -4,7 +4,6 @@ var app = express();
 var restaurant_manager = require('cloud/delegates/restaurant_manager');
 var promotion_manager = require('cloud/delegates/promotion_manager');
 var message_manager = require('cloud/delegates/message_manager');
-var list_manager = require('cloud/delegates/list_manager');
 var dish_manager = require('cloud/delegates/dish_manager');
 var user_manager = require('cloud/delegates/user_manager');
 var rating_manager = require('cloud/delegates/rating_manager');
@@ -46,9 +45,6 @@ app.get('/messages', message_manager.listAll);
 app.get('/messages/:id', message_manager.findById);
 
 
-app.get('/lists/:id', list_manager.findById);
-
-
 
 app.get('/dishes', dish_manager.findByRestaurantId);
 app.get('/dishes/:id', dish_manager.findById);
@@ -65,13 +61,11 @@ app.get('/cities', city_manager.findCitiesWithPrefix);
 app.get('/hotCities', city_manager.getHotCities);
 
 //POST
-app.post('/lists', list_manager.listAll);
 app.post('/restaurants', restaurant_manager.listAll);
 app.post('/promotions', promotion_manager.listAll);
 app.post('/ratings', rating_manager.rateByUserSession);
 app.post('/favorites', favorite_manager.addByUserSession);
-app.post('/lists/candidates', candidate_manager.nominate);
-app.post('/images', image_manager.upload);
+app.post('/images', image_manager.uploadImage);
 app.post('/restaurantCandidates', restaurant_manager.vote);
 
 app.post('/users/oauthLogin', user_manager.oauthLogIn);
