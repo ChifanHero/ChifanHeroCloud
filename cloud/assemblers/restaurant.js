@@ -4,7 +4,14 @@ exports.assemble = function(source, lat, lon) {
 	var restaurant = {};
 	if (source != undefined) {
 		restaurant['id'] = source.id;
-		restaurant['name'] = source.get('name');
+		var name = source.get('name');
+		if (name == undefined || name == '') {
+			var englishName = source.get('english_name'); 
+			if (englishName != undefined && englishName !== '') {
+				name = englishName;
+			}
+		}
+		restaurant['name'] = name;
 		restaurant['english_name'] = source.get('english_name');
 		restaurant['address'] = source.get('address');
 		if (lat != undefined && lon != undefined && source.get('coordinates') != undefined) {

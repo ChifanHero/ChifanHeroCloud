@@ -11,11 +11,14 @@ Parse.Cloud.beforeSave('Restaurant', function(request, response){
 	var restaurantToSave = request.object;
 	if (restaurantToSave.dirty('address')) {
 		var address = restaurantToSave.get('address');
-		getCoordinatesFromAddress(address).then(function(lat, lon){	
+		getCoordinatesFromAddress(address).then(function(lat, lon, formattedAddress){	
 			console.log(lat);
 			console.log(lon);
 			var coordinates = new Parse.GeoPoint({latitude : lat, longitude : lon});
 			restaurantToSave.set('coordinates', coordinates);
+			if (formattedAddress != undefined) {
+				restaurantToSave.set('address', formattedAddress);
+			}
 			response.success();
 		}, function(error){
 			console.log(error);
@@ -110,7 +113,8 @@ function getCoordinatesFromAddress(address) {
                                         && data.results.length > 0 && data.results[0].geometry !== undefined 
                                         && data.results[0].geometry.location !== undefined){
 	                var location = data.results[0].geometry.location;
-	                promise.resolve(location.lat, location.lng);
+	            	var formattedAddress = data.results[0]['formatted_address'];
+	                promise.resolve(location.lat, location.lng, formattedAddress);
 	            } else {
 	            	console.log(data);
 	                promise.reject('unable to get restaurant address from google geocoding');
