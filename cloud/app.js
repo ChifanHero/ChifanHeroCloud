@@ -60,6 +60,8 @@ app.get('/restaurantCollectionMembers/:id', selectedCollection_manager.findAllRe
 app.get('/cities', city_manager.findCitiesWithPrefix);
 app.get('/hotCities', city_manager.getHotCities);
 
+app.get('/images', image_manager.findAllByRestaurantId);
+
 //POST
 app.post('/restaurants', restaurant_manager.listAll);
 app.post('/promotions', promotion_manager.listAll);

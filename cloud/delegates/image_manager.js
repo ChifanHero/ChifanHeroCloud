@@ -45,3 +45,28 @@ exports.uploadImage = function(req, res) {
 		error_handler.handle(error, {}, res);
 	});
 }
+
+exports.findAllByRestaurantId = function(req, res) {
+	var restaurantId = req.query.restaurantId;
+	var restaurant = {
+	        __type: "Pointer",
+	        className: "Restaurant",
+	        objectId: restaurantId
+	};
+	var query = new Parse.Query(ImageDatabase);
+	query.equalTo('restaurant', restaurant);
+	query.find().then(function(images) {
+		var results = [];
+		if (images != undefined && images.length > 0) {
+			_.each(images, function(image) {
+				var result = image_assembler.assemble(image);
+				results.push(result);
+			});
+		}
+		var response = {};
+		response['results'] = results;
+		res.json(200, response);
+	}, function(error) {
+		error_handler.handle(error, {}, res);
+	});
+}
