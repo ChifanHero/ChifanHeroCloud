@@ -1,4 +1,5 @@
-var Image = require("parse-image"); 
+var Image = require("parse-image");
+var Restaurant = Parse.Object.extend('Restaurant');
 
 Parse.Cloud.beforeSave('Image', function(request, response){
 	var imageToSave = request.object;
@@ -27,6 +28,20 @@ Parse.Cloud.beforeSave('Image', function(request, response){
 	} else {
 		response.success();
 	}
+});
+
+Parse.Cloud.afterSave("Image", function(request){
+	var imageSaved = request.object;
+	var restaurant = imageSaved.get("restaurant");
+
+	restaurant.fetch().then(function(restaurant){
+		console.log(restaurant);
+		if(restaurant.get("image") == undefined){
+			restaurant.set("image", imageSaved);
+			restaurant.save();
+		}
+	});
+	
 });
 
 function createThumbnail(data, fileName) {
