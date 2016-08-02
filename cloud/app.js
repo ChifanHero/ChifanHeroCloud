@@ -13,6 +13,7 @@ var menu_manager = require('cloud/delegates/menu_manager');
 var image_manager = require('cloud/delegates/image_manager');
 var selectedCollection_manager = require('cloud/delegates/selectedCollection_manager');
 var city_manager = require('cloud/delegates/city_manager');
+var homepage_manager = require('cloud/delegates/homepage_manager');
 
 //Populate req.body
 app.use(express.bodyParser());
@@ -61,6 +62,8 @@ app.get('/cities', city_manager.findCitiesWithPrefix);
 app.get('/hotCities', city_manager.getHotCities);
 
 app.get('/images', image_manager.findAllByRestaurantId);
+
+app.get('/homepage', homepage_manager.getHomePage);
 
 //POST
 app.post('/restaurants', restaurant_manager.listAll);
