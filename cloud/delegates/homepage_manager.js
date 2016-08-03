@@ -4,9 +4,10 @@ exports.getHomePage = function(req, res) {
 			method: 'POST',
 			url: 'http://internal.service.lightningorder.com/restaurants',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json;charset=utf-8'
 			},
 			body: {
+				request_title: "热门餐厅",
 				user_location: {
 			        lat: 37.3081,
         			lon: -121.9942
@@ -19,9 +20,10 @@ exports.getHomePage = function(req, res) {
 			method: 'POST',
 			url: 'http://internal.service.lightningorder.com/restaurants',
 			headers: {
-				'Content-Type': 'application/json'
+				'Content-Type': 'application/json;charset=utf-8'
 			},
 			body: {
+				request_title: "离您最近",
 				user_location: {
 			        lat: 37.3081,
         			lon: -121.9942
@@ -32,17 +34,17 @@ exports.getHomePage = function(req, res) {
 		}
 	];
 
-	var results = [];
+	var homepageSections = [];
 	var responseIndicator = 0;
 
 	for(var index = 0; index < requestOptions.length; index++){
 		Parse.Cloud.httpRequest(requestOptions[index]).then(function(httpResponse) {
 			// success
 			responseIndicator++;
-			results.push(httpResponse.data);
+			homepageSections.push(httpResponse.data);
 			if(isAllRequestCompleted(responseIndicator, requestOptions.length)){
 				var response = {};
-				response['results'] = results;
+				response['homepagesections'] = homepageSections;
 				res.json(200, response)
 			}
 		},function(httpResponse) {

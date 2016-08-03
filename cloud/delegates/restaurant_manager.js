@@ -16,6 +16,8 @@ exports.listAll = function(req, res) {
 	}
 	var sortBy = req.body["sort_by"];
 	var sortOrder = req.body["sort_order"];
+	var requestTitle = req.body["request_title"];
+	console.log(requestTitle);
 	var userGeoPoint;
 	if (userLocation != undefined && userLocation.lat != undefined && userLocation.lon != undefined) {
 		userGeoPoint = new Parse.GeoPoint(userLocation.lat, userLocation.lon);
@@ -60,6 +62,7 @@ exports.listAll = function(req, res) {
 		// 		return 0;
 		// 	}
 		// }); 
+		response['title'] = requestTitle;
 		response['results'] = restaurants;
 		res.json(200, response)
 	}, function(error) {
