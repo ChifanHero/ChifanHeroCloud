@@ -11,6 +11,7 @@ exports.getHomePage = function(req, res) {
 			},
 			body: {
 				request_title: "热门餐厅",
+				placement: 0,
 				user_location: {
 			        lat: latitude,
         			lon: longitude
@@ -29,6 +30,7 @@ exports.getHomePage = function(req, res) {
 			},
 			body: {
 				request_title: "离您最近",
+				placement: 1,
 				user_location: {
 			        lat: latitude,
         			lon: longitude
