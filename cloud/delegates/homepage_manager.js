@@ -1,4 +1,7 @@
 exports.getHomePage = function(req, res) {
+	var longitude = req.params.lon;
+	var latitude = req.params.lat;
+
 	var requestOptions = [
 		{
 			method: 'POST',
@@ -9,11 +12,13 @@ exports.getHomePage = function(req, res) {
 			body: {
 				request_title: "热门餐厅",
 				user_location: {
-			        lat: 37.3081,
-        			lon: -121.9942
+			        lat: latitude,
+        			lon: longitude
 			    },
-			    limit: 2,
-			    skip: 0
+			    limit: 8,
+			    skip: 0,
+			    sort_by: "hotness",
+			    sort_order: "descend"
 			}
 		},
 		{
@@ -25,11 +30,13 @@ exports.getHomePage = function(req, res) {
 			body: {
 				request_title: "离您最近",
 				user_location: {
-			        lat: 37.3081,
-        			lon: -121.9942
+			        lat: latitude,
+        			lon: longitude
 			    },
-			    limit: 2,
-			    skip: 0
+			    limit: 8,
+			    skip: 0,
+			    sort_by: "distance",
+			    sort_order: "descend"
 			}
 		}
 	];
