@@ -8,6 +8,9 @@
     },
     "_default": {
       "link": "Lightning"
+    },
+    "吃饭英雄_staging": {
+      "applicationId": "28BX7btLUKGGsFGCSyGGv9Pzj1nCWDl9EV6GpMBQ"
     }
   }
 }
