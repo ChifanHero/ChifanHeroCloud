@@ -9,7 +9,43 @@ var _Image = Parse.Object.extend('Image');
 
 Parse.Cloud.beforeSave('Restaurant', function(request, response){
 	var restaurantToSave = request.object;
-	if (restaurantToSave.dirty('address')) {
+	if (restaurantToSave.dirty('like_count') || restaurantToSave.dirty('neutral_count') || restaurantToSave.dirty('dislike_count')) {
+		var oldRestaurant = new Restaurant();
+		oldRestaurant.set("objectId", restaurantToSave.id);
+		oldRestaurant.fetch().then(function(oldRestaurant){
+			var likeCount = 0;
+			var neutralCount = 0;
+			var dislikeCount = 0;
+			if (oldRestaurant.get('like_count') != undefined) {
+				likeCount = oldRestaurant.get('like_count');
+			}
+			if (oldRestaurant.get('neutral_count') != undefined) {
+				neutralCount = oldRestaurant.get('neutral_count');
+			}
+			if (oldRestaurant.get('dislike_count') != undefined) {
+				dislikeCount = oldRestaurant.get('dislike_count');
+			}
+			if (restaurantToSave.dirty('like_count')) {
+				likeCount = restaurantToSave.get('like_count');
+			}
+			if (restaurantToSave.dirty('neutral_count')) {
+				neutralCount = restaurantToSave.get('neutral_count');
+			}
+			if (restaurantToSave.dirty('dislike_count')) {
+				dislikeCount = restaurantToSave.get('dislike_count');
+			}
+			var score = 0.0;
+			if (likeCount != 0 || neutralCount != 0 || dislikeCount != 0) {
+				score = 5 * (likeCount * 1.0 + neutralCount * 0.7) / (likeCount + neutralCount + dislikeCount);
+			} 
+			
+			score = parseFloat(score.toFixed(1));
+			restaurantToSave.set('score', score);
+			response.success();
+		}, function(error) {
+			response.error(error);
+		});
+	} else if (restaurantToSave.dirty('address')) {
 		var address = restaurantToSave.get('address');
 		getCoordinatesFromAddress(address).then(function(lat, lon, formattedAddress){	
 			console.log(lat);

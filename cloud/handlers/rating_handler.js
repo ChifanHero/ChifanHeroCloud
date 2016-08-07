@@ -33,6 +33,7 @@ Parse.Cloud.afterSave('Rating', function(request){
 				_object.increment('neutral_count', 1);
 			}
 		}
+		_object.increment('rating_total', 1);
 		_object.save(); 
 	});
 });
@@ -57,6 +58,7 @@ Parse.Cloud.afterDelete('Rating', function(request){
 		} else if (action === 'neutral') {
 			object.increment('neutral_count', -1);
 		}
+		object.increment('rating_total', -1);
 		object.save(); 
 	});
 });

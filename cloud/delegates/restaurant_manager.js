@@ -190,9 +190,10 @@ exports.rate = function(req, res){
 		var likeCount = _restaurant.get('like_count');
 		var dislikeCount = _restaurant.get('dislike_count');
 		var neutralCount = _restaurant.get('neutral_count');
-		_restaurant.set('like_count', likeCount + like);
-		_restaurant.set('dislike_count', dislikeCount + dislike);
-		_restaurant.set('neutral_count', neutralCount + neutral);
+		_restaurant.increment('like_count', like);
+		_restaurant.increment('dislike_count', dislike);
+		_restaurant.increment('neutral_count', neutral);
+		_restaurant.increment('rating_total', like + dislike + neutral);
 		_restaurant.save().then(function(_restaurant){
 			var restaurantRes = restaurant_assembler.assemble(_restaurant);
 			var response = {};
