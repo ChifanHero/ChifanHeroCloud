@@ -1,6 +1,6 @@
 exports.getHomePage = function(req, res) {
-	var longitude = req.params.lon;
-	var latitude = req.params.lat;
+	var longitude = parseInt(req.query.lon);
+	var latitude = parseInt(req.query.lat);
 
 	var requestOptions = [
 		{
