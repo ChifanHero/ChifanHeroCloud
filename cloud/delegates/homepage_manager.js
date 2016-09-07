@@ -124,7 +124,7 @@ function findNearestRestaurants(limit, latitude, longitude) {
 	return promise;
 }
 
-// within 10 miles, best restaurants
+// within 5 miles, best restaurants
 function findRecomendedRestaurants(limit, latitude, longitude) {
 	var promise = new Parse.Promise();
 	var query = new Parse.Query(Restaurant);
@@ -134,8 +134,9 @@ function findRecomendedRestaurants(limit, latitude, longitude) {
 	}
 	if (latitude != undefined && longitude != undefined) {
 		userGeoPoint = new Parse.GeoPoint(latitude, longitude);
-		query.withinMiles("coordinates", userGeoPoint, 10);
+		query.withinMiles("coordinates", userGeoPoint, 5);
 	}
+	query.notEqualTo("permanantly_closed", true);
 	query.descending("like_count");
 	query.greaterThanOrEqualTo("score", 3.5);
 	query.find().then(function(results) {
