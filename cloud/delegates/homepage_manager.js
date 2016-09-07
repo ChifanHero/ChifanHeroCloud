@@ -1,3 +1,8 @@
+var _ = require('underscore');
+var restaurant_assembler = require('cloud/assemblers/restaurant');
+var Restaurant = Parse.Object.extend('Restaurant');
+var error_handler = require('cloud/error_handler');
+
 exports.getHomePage = function(req, res) {
 	var longitude = parseFloat(req.query.lon);
 	var latitude = parseFloat(req.query.lat);
@@ -69,4 +74,127 @@ var isAllRequestCompleted = function(currentCount, totalCount){
 	} else {
 		return true;
 	}
+}
+
+exports.getRecommendations = function(req, res) {
+	var promises = [];
+	var longitude = parseFloat(req.query.lon);
+	var latitude = parseFloat(req.query.lat);
+	promises.push(findNearestRestaurants(10, latitude, longitude));
+	promises.push(findRecomendedRestaurants(5, latitude, longitude));
+	promises.push(findHotestRestaurants(15, latitude, longitude));
+	var response = {};
+	Parse.Promise.when(promises).then(function(nearest, recommended, hottest){
+		var recommendations = [];
+		var placement = 0;
+		if (recommended.length >= 3) {
+			recommendations.push(assembleRecommendation(recommended, "英雄推荐", placement));
+			nearest = dedupe(nearest, recommended);
+			hottest = dedupe(hottest, recommended.concat(nearest));
+			placement++;
+		}
+		recommendations.push(assembleRecommendation(hottest, "热门餐厅", placement));
+		placement++;
+		recommendations.push(assembleRecommendation(nearest, "离您最近", placement));
+		response['homepagesections'] = recommendations;
+		res.json(200, response);
+	}, function(error) {
+		error_handler.handle(error, {}, res);
+	});
+}
+
+// nearest
+function findNearestRestaurants(limit, latitude, longitude) {
+	var promise = new Parse.Promise();
+	var query = new Parse.Query(Restaurant);
+	query.include('image');
+	if (limit != undefined) {
+		query.limit(limit);
+	}
+	if (latitude != undefined && longitude != undefined) {
+		userGeoPoint = new Parse.GeoPoint(latitude, longitude);
+		query.near("coordinates", userGeoPoint);
+	}
+	query.find().then(function(results) {
+		promise.resolve(results);
+	}, function(error) {
+		var empty = [];
+		promise.resolve(empty);
+	});
+	return promise;
+}
+
+// within 10 miles, best restaurants
+function findRecomendedRestaurants(limit, latitude, longitude) {
+	var promise = new Parse.Promise();
+	var query = new Parse.Query(Restaurant);
+	query.include('image');
+	if (limit != undefined) {
+		query.limit(limit);
+	}
+	if (latitude != undefined && longitude != undefined) {
+		userGeoPoint = new Parse.GeoPoint(latitude, longitude);
+		query.withinMiles("coordinates", userGeoPoint, 10);
+	}
+	query.descending("like_count");
+	query.greaterThanOrEqualTo("score", 3.5);
+	query.find().then(function(results) {
+		promise.resolve(results);
+	}, function(error) {
+		var empty = [];
+		promise.resolve(empty);
+	});
+	return promise;
+}
+
+// within  30 miles, best restaurants
+function findHotestRestaurants(limit, latitude, longitude) {
+	var promise = new Parse.Promise();
+	var query = new Parse.Query(Restaurant);
+	query.include('image');
+	if (limit != undefined) {
+		query.limit(limit);
+	}
+	if (latitude != undefined && longitude != undefined) {
+		userGeoPoint = new Parse.GeoPoint(latitude, longitude);
+		query.withinMiles("coordinates", userGeoPoint, 30);
+	}
+	query.descending("like_count");
+	query.find().then(function(results) {
+		promise.resolve(results);
+	}, function(error) {
+		var empty = [];
+		promise.resolve(empty);
+	});
+	return promise;
+}
+
+function assembleRecommendation(restaurants, title, placement) {
+	var recommendation = {};
+	var results = [];
+	_.each(restaurants, function(restaurant){
+		var result = restaurant_assembler.assemble(restaurant);
+		results.push(result);
+	});
+	recommendation['results'] = results;
+	recommendation['title'] = title;
+	recommendation['placement'] = placement;
+	return recommendation;
+}
+
+function dedupe(restaurants, blacklist) {
+	if (restaurants == undefined || blacklist == undefined) {
+		return restaurants;
+	}
+	var keySet = {};
+	_.each(blacklist, function(element){
+		keySet[element.id] = true;
+	});
+	var deduped = [];
+	_.each(restaurants, function(restaurant){
+		if (keySet[restaurant.id] != true) {
+			deduped.push(restaurant);
+		}
+	});
+	return deduped;
 }

@@ -63,7 +63,8 @@ app.get('/hotCities', city_manager.getHotCities);
 
 app.get('/images', image_manager.findAllByRestaurantId);
 
-app.get('/homepage', homepage_manager.getHomePage);
+// app.get('/homepage', homepage_manager.getHomePage);
+app.get('/homepage', homepage_manager.getRecommendations);
 
 //POST
 app.post('/restaurants', restaurant_manager.listAll);
