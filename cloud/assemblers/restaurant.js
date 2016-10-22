@@ -32,6 +32,12 @@ exports.assemble = function(source, lat, lon) {
 		restaurant['neutral_count'] = source.get('neutral_count');
 		restaurant['phone'] = source.get('phone');
 		restaurant['hours'] = source.get('hours');
+		if (source.get('score') != undefined) {
+			restaurant['rating'] = parseFloat(source.get('score').toFixed(1));
+		} else {
+			restaurant['rating'] = 0.0
+		}
+		
 		restaurant['picture'] = image_assembler.assemble(source.get('image'));
 	}
 	return restaurant; 

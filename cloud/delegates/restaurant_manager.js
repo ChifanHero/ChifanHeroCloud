@@ -74,10 +74,12 @@ exports.listAll = function(req, res) {
 exports.findById = function(req, res) {
 	var id = req.params.id;
 	var promises = [];
+	var longitude = parseFloat(req.query.lon);
+	var latitude = parseFloat(req.query.lat);
 	promises.push(findRestaurantById(id));
 	promises.push(findHotDishesByRestaurantId(id));
 	Parse.Promise.when(promises).then(function(_restaurant, _dishes){
-		var restaurant = restaurant_assembler.assemble(_restaurant);
+		var restaurant = restaurant_assembler.assemble(_restaurant, latitude, longitude);
 		var dishes = [];
 		if (_dishes != undefined && _dishes.length > 0) {
 			_.each(_dishes, function(_dish){

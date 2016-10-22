@@ -88,18 +88,18 @@ exports.getRecommendations = function(req, res) {
 		var recommendations = [];
 		var placement = 0;
 		if (recommended.length >= 3) {
-			recommendations.push(assembleRecommendation(recommended, "英雄推荐", placement));
+			recommendations.push(assembleRecommendation(recommended, "英雄推荐", placement, latitude, longitude));
 			nearest = dedupe(nearest, recommended);
 			hottest = dedupe(hottest, recommended.concat(nearest));
 			placement++;
 		}
-		recommendations.push(assembleRecommendation(hottest, "热门餐厅", placement));
+		recommendations.push(assembleRecommendation(hottest, "热门餐厅", placement, latitude, longitude));
 		placement++;
-		recommendations.push(assembleRecommendation(nearest, "离您最近", placement));
+		recommendations.push(assembleRecommendation(nearest, "离您最近", placement, latitude, longitude));
 		response['homepagesections'] = recommendations;
 		res.json(200, response);
 	}, function(error) {
-		error_handler.handle(error, {}, res);
+		error_handler.handle(error, {}, res); 
 	});
 }
 
@@ -170,11 +170,13 @@ function findHotestRestaurants(limit, latitude, longitude) {
 	return promise;
 }
 
-function assembleRecommendation(restaurants, title, placement) {
+function assembleRecommendation(restaurants, title, placement, latitude, longitude) {
 	var recommendation = {};
 	var results = [];
+	console.log(latitude);
+	console.log(longitude);
 	_.each(restaurants, function(restaurant){
-		var result = restaurant_assembler.assemble(restaurant);
+		var result = restaurant_assembler.assemble(restaurant, latitude, longitude);
 		results.push(result);
 	});
 	recommendation['results'] = results;
