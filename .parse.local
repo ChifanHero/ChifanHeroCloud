@@ -1,16 +1,13 @@
 {
   "applications": {
-    "Lightning": {
+    "production": {
       "applicationId": "Z6ND8ho1yR4aY3NSq1zNNU0kPc0GDOD1UZJ5rgxM"
     },
-    "Lightning_staging": {
+    "staging": {
       "applicationId": "28BX7btLUKGGsFGCSyGGv9Pzj1nCWDl9EV6GpMBQ"
     },
     "_default": {
-      "link": "Lightning"
-    },
-    "吃饭英雄_staging": {
-      "applicationId": "28BX7btLUKGGsFGCSyGGv9Pzj1nCWDl9EV6GpMBQ"
+      "link": "staging"
     }
   }
 }
