@@ -66,6 +66,7 @@ app.get('/images', image_manager.findAllByRestaurantId);
 
 // app.get('/homepage', homepage_manager.getHomePage);
 app.get('/homepage', homepage_manager.getRecommendations);
+app.get('/reviews', review_manager.listReviews);
 
 //POST
 app.post('/restaurants', restaurant_manager.listAll);
