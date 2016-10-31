@@ -14,6 +14,7 @@ var image_manager = require('cloud/delegates/image_manager');
 var selectedCollection_manager = require('cloud/delegates/selectedCollection_manager');
 var city_manager = require('cloud/delegates/city_manager');
 var homepage_manager = require('cloud/delegates/homepage_manager');
+var review_manager = require('cloud/delegates/review_manager');
 
 //Populate req.body
 app.use(express.bodyParser());
@@ -79,6 +80,8 @@ app.post('/users/signUp', user_manager.signUp);
 app.post('/users/logIn', user_manager.logIn);
 app.post('/users/update', user_manager.update);
 app.post('/users/logOut', user_manager.logOut);
+app.post('/reviews', review_manager.createReview);
+
 
 //PUT
 app.put('/restaurants/:id', restaurant_manager.update);

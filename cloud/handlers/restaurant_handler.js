@@ -82,6 +82,54 @@ Parse.Cloud.beforeSave('Restaurant', function(request, response){
 		}, function(error) {
 			response.error(error);
 		});
+	} else if (restaurantToSave.dirty('score_1') || restaurantToSave.dirty('score_2') || restaurantToSave.dirty('score_3') || restaurantToSave.dirty('score_4') || restaurantToSave.dirty('score_5')) {
+		var oldRestaurant = new Restaurant();
+		oldRestaurant.set("objectId", restaurantToSave.id);
+		oldRestaurant.fetch().then(function(oldRestaurant){
+			var score1 = 0;
+			var score2 = 0;
+			var score3 = 0;
+			var score4 = 0;
+			var score5 = 0;
+			if (oldRestaurant.get('score_1') != undefined) {
+				score1 = oldRestaurant.get('score_1');
+			}
+			if (oldRestaurant.get('score_2') != undefined) {
+				score2 = oldRestaurant.get('score_2');
+			}
+			if (oldRestaurant.get('score_3') != undefined) {
+				score3 = oldRestaurant.get('score_3');
+			}
+			if (oldRestaurant.get('score_4') != undefined) {
+				score4 = oldRestaurant.get('score_4');
+			}
+			if (oldRestaurant.get('score_5') != undefined) {
+				score5 = oldRestaurant.get('score_5');
+			}
+			if (restaurantToSave.dirty('score_1')) {
+				score1 = restaurantToSave.get('score_1');
+			}
+			if (restaurantToSave.dirty('score_2')) {
+				score2 = restaurantToSave.get('score_2');
+			}
+			if (restaurantToSave.dirty('score_3')) {
+				score3 = restaurantToSave.get('score_3');
+			}
+			if (restaurantToSave.dirty('score_4')) {
+				score4 = restaurantToSave.get('score_4');
+			}
+			if (restaurantToSave.dirty('score_5')) {
+				score5 = restaurantToSave.get('score_5');
+			}
+			var ratingTotal = score1 + score2 + score3 + score4 + score5;
+			var score = (score1 + score2 * 2 + score3 * 3 + score4 * 4 + score5 * 5) / ratingTotal;
+			score = parseFloat(score.toFixed(1));
+			restaurantToSave.set('score', score);
+			restaurantToSave.set('rating_total', ratingTotal);
+			response.success();
+		}, function(error) {
+			response.error(error);
+		});
 	} else {
 		response.success();
 	}
