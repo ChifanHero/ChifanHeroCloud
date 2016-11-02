@@ -1,8 +1,10 @@
 var user_assembler = require('cloud/assemblers/user');
+var image_assembler = require('cloud/assemblers/image');
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('cloud/config.js'));
+var _ = require('underscore');
 
-exports.assemble = function(source) {
+exports.assemble = function(source, photos) {
 	var review = {};
 	if (source != undefined) {
 		review['id'] = source.id;
@@ -19,6 +21,15 @@ exports.assemble = function(source) {
 				pointsRewarded = config['review']['good_review_user_points'];
 			}
 			review['points_rewarded'] = pointsRewarded;
+		}
+		if (photos != undefined && photos.length > 0) {
+			var _photos = [];
+			_.each(photos, function(_photo){
+				var photo = image_assembler.assemble(_photo);
+				_photos.push(photo);
+			});
+			review['photos'] = _photos;
+
 		}
 
 	}

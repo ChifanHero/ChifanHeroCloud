@@ -15,6 +15,7 @@ var selectedCollection_manager = require('cloud/delegates/selectedCollection_man
 var city_manager = require('cloud/delegates/city_manager');
 var homepage_manager = require('cloud/delegates/homepage_manager');
 var review_manager = require('cloud/delegates/review_manager');
+var userActivity_manager = require('cloud/delegates/userActivity_manager');
 
 //Populate req.body
 app.use(express.bodyParser());
@@ -67,6 +68,8 @@ app.get('/images', image_manager.findAllByRestaurantId);
 // app.get('/homepage', homepage_manager.getHomePage);
 app.get('/homepage', homepage_manager.getRecommendations);
 app.get('/reviews', review_manager.listReviews);
+app.get('/activities', userActivity_manager.listUserActivities);
+app.get('/reviews/:id', review_manager.fetchReview);
 
 //POST
 app.post('/restaurants', restaurant_manager.listAll);

@@ -141,3 +141,24 @@ exports.listReviews = function(req, res){
 		error_handler.handle(error, {}, res);
 	});
 }
+
+exports.fetchReview = function(req, res) {
+	var id = req.params.id;
+	var review = new Review();
+	review.id = id;
+	var promises = [];
+	promises.push(review.fetch());
+	var imageQuery = new Parse.Query(Image);
+	imageQuery.equalTo('owner_type', 'Review');
+	imageQuery.equalTo('review', review);
+	promises.push(imageQuery.find());
+	Parse.Promise.when(promises).then(function(_review, _photos){
+		console.log(_photos.length); 
+		var review = review_assembler.assemble(_review, _photos);
+		var response = {};
+		response['result'] = review;
+		res.json(200, response);
+	}, function(error) {
+		error_handler.handle(error, {}, res);
+	});
+}
