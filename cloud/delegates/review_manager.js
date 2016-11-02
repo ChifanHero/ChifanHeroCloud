@@ -5,6 +5,8 @@ var error_handler = require('cloud/error_handler');
 var Image = Parse.Object.extend('Image');
 var Restaurant = Parse.Object.extend('Restaurant');
 var review_assembler = require('cloud/assemblers/review');
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('cloud/config.js'));
 
 
 // request:
@@ -35,7 +37,13 @@ exports.createReview = function(req, res){
 	}
 	review.set('content', content);
 	review.set('rating', rating);
-	review.set('review_quality', calculateQuality(content, photos));
+	var isGoodReview = false;
+	var reviewQuality = calculateQuality(content, photos);
+	if (reviewQuality >= config['review']['good_review_threshold']) {
+		isGoodReview = true;
+	}
+	review.set('good_review', isGoodReview);
+	review.set('review_quality', reviewQuality);
 	var restaurant = new Restaurant();
 	restaurant.id = restaurantId;
 	review.set('restaurant', restaurant);
@@ -43,7 +51,12 @@ exports.createReview = function(req, res){
 	acl.setPublicReadAccess(true);
 	if (user != undefined) {
 		review.set('user', user);
-		acl.setWriteAccess(user.id, true);  
+		acl.setWriteAccess(user.id, true); 
+		var userPoints = config['review']['user_points'];
+		if (reviewQuality >= config['review']['good_review_threshold']) {
+			userPoints = config['review']['good_review_user_points'];
+		}
+		user.increment('points', userPoints); 
 	}
 	// var objectsToSave = [];
 	// objectsToSave.push(review);
@@ -80,6 +93,9 @@ exports.createReview = function(req, res){
 
 function calculateQuality(content, photos) {
 	var quality = 0;
+	var pictureValue = config['review']['picture_value'];
+	var wordValue = config['review']['word_value'];
+	console.log(wordValue);
 	if (content != undefined) {
 		var splitter = ' ';
 		if (content.match(/[\u3400-\u9FBF]/)) {
@@ -88,10 +104,10 @@ function calculateQuality(content, photos) {
 		var uniqueList=content.split(splitter).filter(function(allItems,i,a){
 		    return i==a.indexOf(allItems);
 		});
-		quality += uniqueList.length;
+		quality += uniqueList.length * wordValue;
 	}
 	if (photos != undefined) {
-		quality += photos.length * 20;
+		quality += photos.length * pictureValue;
 	}
 	return quality;
 }

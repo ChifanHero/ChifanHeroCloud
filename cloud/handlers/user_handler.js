@@ -1,4 +1,6 @@
 var _Image = Parse.Object.extend('Image');
+var fs = require('fs');
+var config = JSON.parse(fs.readFileSync('cloud/config.js'));
 
 Parse.Cloud.beforeSave(Parse.User, function(request, response) {
 	var userToSave = request.object;
@@ -28,7 +30,20 @@ Parse.Cloud.beforeSave(Parse.User, function(request, response) {
 		}, function(error) {
 			response.reject(error);
 		});
-	} else {
+	} 
+	if (userToSave.dirty('points')) {
+		var points = userToSave.get('points');
+		var levelThresholds = config['user']['level_thresholds'];
+		var levelNames = config['user']['level_names'];
+		var level = 0;
+		var index = 0;
+		while  (index < levelThresholds.length && points >= levelThresholds[index]) {
+			index++;
+			level++;
+		}
+		var levelName = levelNames[level - 1];
+		userToSave.set('level', level);
+		userToSave.set('levelName', levelName);
 		response.success();
 	}
     
