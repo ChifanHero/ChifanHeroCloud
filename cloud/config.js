@@ -9,5 +9,11 @@
 	"user" : {
 		"level_thresholds" : [0, 30],
 		"level_names" : ["路人甲", "普通吃货"]
+	},
+	"dish_recommendation" : {
+		"user_points" : 10
+	},
+	"upload_image" : {
+		"user_points" : 10
 	}
 }

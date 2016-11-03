@@ -15,6 +15,9 @@ exports.listUserActivities = function(req, res){
 	userActivityQuery.include('user');
 	userActivityQuery.include('user.picture');
 	userActivityQuery.include('review');
+	userActivityQuery.include('review.restaurant');
+	userActivityQuery.include('restaurant');
+	userActivityQuery.include('dish');
 	// userActivityQuery.include('recommendation');
 	userActivityQuery.descending('updatedAt');
 	userActivityQuery.find().then(function(_activities){

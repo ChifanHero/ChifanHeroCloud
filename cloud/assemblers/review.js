@@ -1,5 +1,6 @@
 var user_assembler = require('cloud/assemblers/user');
 var image_assembler = require('cloud/assemblers/image');
+var restaurant_assembler = require('cloud/assemblers/restaurant');
 var fs = require('fs');
 var config = JSON.parse(fs.readFileSync('cloud/config.js'));
 var _ = require('underscore');
@@ -31,6 +32,7 @@ exports.assemble = function(source, photos) {
 			review['photos'] = _photos;
 
 		}
+		review['restaurant'] = restaurant_assembler.assemble(source.get('restaurant'));
 
 	}
 	return review; 

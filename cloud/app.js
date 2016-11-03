@@ -16,6 +16,7 @@ var city_manager = require('cloud/delegates/city_manager');
 var homepage_manager = require('cloud/delegates/homepage_manager');
 var review_manager = require('cloud/delegates/review_manager');
 var userActivity_manager = require('cloud/delegates/userActivity_manager');
+var dish_recommendation_manager = require('cloud/delegates/dish_recommendation_manager');
 
 //Populate req.body
 app.use(express.bodyParser());
@@ -85,6 +86,7 @@ app.post('/users/logIn', user_manager.logIn);
 app.post('/users/update', user_manager.update);
 app.post('/users/logOut', user_manager.logOut);
 app.post('/reviews', review_manager.createReview);
+app.post('/dishRecommendations', dish_recommendation_manager.createDishRecommendation);
 
 
 //PUT
