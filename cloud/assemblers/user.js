@@ -1,3 +1,5 @@
+var image_assembler = require('cloud/assemblers/image');
+
 exports.assemble = function(source) {
 	var user = {};
 	if (source != undefined) {
@@ -5,6 +7,8 @@ exports.assemble = function(source) {
 		user['username'] = source.get('username');
 		user['nick_name'] = source.get('nick_name');
 		user['email'] = source.get('email');
+		console.log(source.get('picture'));
+		user['picture'] = image_assembler.assemble(source.get('picture'));
 	}
 	return user;
 }

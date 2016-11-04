@@ -18,7 +18,9 @@ exports.assemble = function(source) {
 			var uploadActivity = {};
 			activity['upload_image'] = uploadActivity;
 		} else if (type == 'recommend_dish') {
-			activity['recommend_dish'] = dish_assembler.assemble(source.get('dish'));
+			var dishRecommendation = {};
+			dishRecommendation['dish'] = dish_assembler.assemble(source.get('dish'));
+			activity['recommend_dish'] = dishRecommendation;
 		}
 		
 	} 

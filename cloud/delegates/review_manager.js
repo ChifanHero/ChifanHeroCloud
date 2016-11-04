@@ -144,20 +144,30 @@ exports.listReviews = function(req, res){
 
 exports.fetchReview = function(req, res) {
 	var id = req.params.id;
-	var review = new Review();
-	review.id = id;
+	var reviewQuery = new Parse.Query(Review);
+	reviewQuery.equalTo('objectId', id);
+	reviewQuery.include('user');
+	reviewQuery.include('user.picture');
+	reviewQuery.include('restaurant');
 	var promises = [];
-	promises.push(review.fetch());
+	promises.push(reviewQuery.find());
 	var imageQuery = new Parse.Query(Image);
 	imageQuery.equalTo('owner_type', 'Review');
+	var review = new Review();
+	review.id = id;
 	imageQuery.equalTo('review', review);
 	promises.push(imageQuery.find());
-	Parse.Promise.when(promises).then(function(_review, _photos){
-		console.log(_photos.length); 
-		var review = review_assembler.assemble(_review, _photos);
-		var response = {};
-		response['result'] = review;
-		res.json(200, response);
+	Parse.Promise.when(promises).then(function(_reviews, _photos){
+		if (_reviews != undefined && _reviews.length > 0) {
+			console.log(_photos.length); 
+			var review = review_assembler.assemble(_reviews[0], _photos);
+			var response = {};
+			response['result'] = review;
+			res.json(200, response);
+		} else {
+			res.json(404, {});
+		}
+		
 	}, function(error) {
 		error_handler.handle(error, {}, res);
 	});
