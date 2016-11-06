@@ -25,19 +25,22 @@ exports.uploadImage = function(req, res) {
 	var type = req.body["type"];
 	var base64Code = req.body["base64_code"];
 	var clientEventId = req.body["event_id"];
-	var user = req.user;
+	var user = req.user; 
 
 	var file = new Parse.File(type + ".jpeg", { base64: base64Code });
-	var restaurant = {
-	        __type: "Pointer",
-	        className: "Restaurant",
-	        objectId: restaurantId
-	};
 
 	var newImage = new ImageDatabase();
 	newImage.set("original", file);
 	newImage.set("type", type);
-	newImage.set("restaurant", restaurant);
+	if (restaurantId != undefined) {
+		var restaurant = {
+	        __type: "Pointer",
+	        className: "Restaurant",
+	        objectId: restaurantId
+		};
+		newImage.set("restaurant", restaurant);
+	}  
+	
 	newImage.save().then(function(newImage) {
 		if (user != undefined) {
 			createUserActivity(clientEventId, user, newImage.id, restaurantId);

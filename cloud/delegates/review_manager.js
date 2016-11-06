@@ -30,6 +30,7 @@ exports.createReview = function(req, res){
 	var content = req.body['content'];
 	var id = req.body['id'];
 	var photos = req.body['photos'];
+	console.log("photos count = " + photos.length);
 	var restaurantId = req.body['restaurant_id'];
 	var review = new Review();
 	if (id !== undefined) {
@@ -64,6 +65,7 @@ exports.createReview = function(req, res){
 	review.save().then(function(savedReview){
 		var objectsToSave = [];
 		if (photos != undefined && _.isArray(photos) && photos.length > 0) {
+			console.log("images ".concat(photos));
 			_.each(photos, function(photoId){
 				var image = new Image();
 				image.id = photoId;

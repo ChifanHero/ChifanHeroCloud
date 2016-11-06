@@ -33,14 +33,16 @@ Parse.Cloud.beforeSave('Image', function(request, response){
 Parse.Cloud.afterSave("Image", function(request){
 	var imageSaved = request.object;
 	var restaurant = imageSaved.get("restaurant");
-
-	restaurant.fetch().then(function(restaurant){
-		console.log(restaurant);
-		if(restaurant.get("image") == undefined){
-			restaurant.set("image", imageSaved);
-			restaurant.save();
-		}
-	});
+	if (restaurant != undefined) {
+		restaurant.fetch().then(function(restaurant){
+			console.log(restaurant);
+			if(restaurant.get("image") == undefined){
+				restaurant.set("image", imageSaved);
+				restaurant.save();
+			}
+		});
+	}
+	
 	
 });
 
