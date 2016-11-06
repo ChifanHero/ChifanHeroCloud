@@ -126,7 +126,7 @@ exports.findById = function(req, res) {
 				});
 			}
 			reviewsContainer['reviews'] = reviews;
-			restaurant['reviews'] = reviewsContainer;
+			restaurant['review_info'] = reviewsContainer;
 		}
 
 		if (_photo != undefined) {
@@ -140,7 +140,7 @@ exports.findById = function(req, res) {
 				});
 			}
 			photosContainer['photos'] = photos;
-			restaurant['photos'] = photosContainer;
+			restaurant['photo_info'] = photosContainer;
 		}
 		var response = {};
 		response['result'] = restaurant;
