@@ -118,6 +118,9 @@ exports.listReviews = function(req, res){
 	var skip = req.params["skip"];
 	var limit = req.params["limit"];
 	var reviewQuery = new Parse.Query(Review);
+	var restaurant = new Restaurant();
+	restaurant.id = restaurantId;
+	reviewQuery.equalTo('restaurant', restaurant);
 	if (sort == 'latest') {
 		reviewQuery.descending('updatedAt');
 	} else {

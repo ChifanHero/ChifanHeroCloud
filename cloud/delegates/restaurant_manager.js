@@ -1,4 +1,6 @@
 var Restaurant = Parse.Object.extend('Restaurant');
+var Image = Parse.Object.extend('Image');
+var Review = Parse.Object.extend('Review');
 var RestaurantCandidate = Parse.Object.extend('RestaurantCandidate');
 var Dish = Parse.Object.extend('Dish');
 var _ = require('underscore');
@@ -6,6 +8,7 @@ var restaurant_assembler = require('cloud/assemblers/restaurant');
 var dish_assembler = require('cloud/assemblers/dish');
 var error_handler = require('cloud/error_handler');
 var image_assembler = require('cloud/assemblers/image');
+var review_assembler = require('cloud/assemblers/review');
 
 exports.listAll = function(req, res) {
 	var userLocation = req.body['user_location'];
@@ -78,7 +81,9 @@ exports.findById = function(req, res) {
 	var latitude = parseFloat(req.query.lat);
 	promises.push(findRestaurantById(id));
 	promises.push(findHotDishesByRestaurantId(id));
-	Parse.Promise.when(promises).then(function(_restaurant, _dishes){
+	promises.push(findHotReviewsByRestaurantId(id));
+	promises.push(findPhotosByRestaurantId(id));
+	Parse.Promise.when(promises).then(function(_restaurant, _dishes, _review, _photo){
 		var restaurant = restaurant_assembler.assemble(_restaurant, latitude, longitude);
 		var dishes = [];
 		if (_dishes != undefined && _dishes.length > 0) {
@@ -109,11 +114,37 @@ exports.findById = function(req, res) {
 				response['result'] = restaurant;
 				res.json(200, response);
 			});
-		} else {
-			var response = {};
-			response['result'] = restaurant;
-			res.json(200, response);
+		} 
+		if (_review != undefined) {
+			var reviewsContainer = {};
+			reviewsContainer['total_count'] = _review['total_count'];
+			var reviews = [];
+			if (_review['reviews'] != undefined && _review['reviews'].length > 0) {
+				_.each(_review['reviews'], function(item){
+					var review = review_assembler.assemble(item);
+					reviews.push(review);
+				});
+			}
+			reviewsContainer['reviews'] = reviews;
+			restaurant['reviews'] = reviewsContainer;
 		}
+
+		if (_photo != undefined) {
+			var photosContainer = {};
+			photosContainer['total_count'] = _photo['total_count'];
+			var photos = [];
+			if (_photo['photos'] != undefined && _photo['photos'].length > 0) {
+				_.each(_photo['photos'], function(item){
+					var photo = image_assembler.assemble(item);
+					photos.push(photo);
+				});
+			}
+			photosContainer['photos'] = photos;
+			restaurant['photos'] = photosContainer;
+		}
+		var response = {};
+		response['result'] = restaurant;
+		res.json(200, response);
 		
 	}, function(error) {
 		error_handler.handle(error, {}, res);
@@ -225,6 +256,57 @@ function findHotDishesByRestaurantId(id) {
 	query.limit(10);
 	return query.find();
 }
+
+function findHotReviewsByRestaurantId(id) {
+	var promise = new Parse.Promise();
+	var dependencies = [];
+	var reviewQuery = new Parse.Query(Review);
+	reviewQuery.descending('review_quality');
+	reviewQuery.limit(5);
+	reviewQuery.include('user');
+	reviewQuery.include('user.picture');
+	reviewQuery.exists('content');
+	var restaurant = new Restaurant();
+	restaurant.id = id;
+	reviewQuery.equalTo('restaurant', restaurant);
+	dependencies.push(reviewQuery.find());
+	reviewQuery = new Parse.Query(Review);
+	reviewQuery.equalTo('restaurant', restaurant);
+	dependencies.push(reviewQuery.count());	
+	Parse.Promise.when(dependencies).then(function(reviews, count) {
+		var result = {};
+		result['reviews'] = reviews;
+		result['total_count'] = count;
+		promise.resolve(result);
+	}, function() {
+		promise.reject();
+	});
+	return promise;
+}
+
+function findPhotosByRestaurantId(id) {
+	var promise = new Parse.Promise();
+	var dependencies = [];
+	var query = new Parse.Query(Image);
+	var restaurant = new Restaurant();
+	restaurant.id = id;
+	query.equalTo('restaurant', restaurant);
+	dependencies.push(query.find());
+	query = new Parse.Query(Image);
+	query.equalTo('restaurant', restaurant);
+	dependencies.push(query.count());	
+	Parse.Promise.when(dependencies).then(function(photos, count) {
+		var result = {};
+		result['photos'] = photos;
+		result['total_count'] = count;
+		promise.resolve(result);
+	}, function() {
+		promise.reject();
+	});
+	return promise;
+}
+
+
 
 exports.update = function(req, res) {
 	var id = req.params.id;
