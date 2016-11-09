@@ -115,13 +115,16 @@ function calculateQuality(content, photos) {
 }
 
 exports.listReviews = function(req, res){
-	var restaurantId = req.params['restaurant_id'];
-	var sort = req.params['sort'];
-	var skip = req.params["skip"];
-	var limit = req.params["limit"];
+	var restaurantId = req.query['restaurant_id'];
+	console.log(restaurantId);
+	console.log(req.params);
+	var sort = req.query['sort'];
+	var skip = req.query["skip"];
+	var limit = req.query["limit"];
 	var reviewQuery = new Parse.Query(Review);
 	var restaurant = new Restaurant();
 	restaurant.id = restaurantId;
+	console.log(restaurant.id);
 	reviewQuery.equalTo('restaurant', restaurant);
 	if (sort == 'latest') {
 		reviewQuery.descending('updatedAt');
